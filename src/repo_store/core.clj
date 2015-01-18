@@ -4,5 +4,4 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (repo/pull "joebadom/joe.xoxomoon.com-content"))
-
+  (repo/get-change-set "joebadmo/joe.xoxomoon.com-content"))
