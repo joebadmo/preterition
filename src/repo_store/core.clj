@@ -1,6 +1,7 @@
 (ns repo-store.core
   (:require [repo-store.config :as config]
-            [repo-store.repo :as repo]))
+            [repo-store.repo :as repo]
+            [repo-store.parse :as parse]))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -17,5 +18,7 @@
 (def added-markdown-files (filter-markdown-files added))
 
 (pprint (into {} (map
-           #(vector % (get-contents %))
+           #(vector % (-> %
+                          get-contents
+                          parse/parse))
            added-markdown-files)))
