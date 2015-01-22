@@ -5,9 +5,12 @@
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[clj-jgit "0.8.3"]
                  [clj-yaml "0.4.0"]
+                 [clj-time "0.9.0"]
                  [me.raynes/cegdown "0.1.1"]
                  [org.clojure/clojure "1.6.0"]
-                 [org.eclipse.jgit/org.eclipse.jgit.java7 "3.5.0.201409260305-r"]]
+                 [org.eclipse.jgit/org.eclipse.jgit.java7 "3.5.0.201409260305-r"]
+                 [yesql "0.4.0"]
+                 [org.postgresql/postgresql "9.3-1102-jdbc41"]]
   :main ^:skip-aot repo-store.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
