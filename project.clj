@@ -9,7 +9,7 @@
                  [me.raynes/cegdown "0.1.1"]
                  [org.clojure/clojure "1.6.0"]
                  [org.eclipse.jgit/org.eclipse.jgit.java7 "3.5.0.201409260305-r"]
-                 [yesql "0.4.0"]
+                 [yesql "0.5.0-beta2"]
                  [org.postgresql/postgresql "9.3-1102-jdbc41"]]
   :main ^:skip-aot repo-store.core
   :target-path "target/%s"

@@ -10,15 +10,15 @@
               :user "jmoon"})
 
 (defquery create-table! "repo_store/sql/create.sql")
-(defquery insert-document! "repo_store/sql/insert.sql")
+(defquery insert-document! "repo_store/sql/insert.sql"
+    {:connection db-spec})
 
 (create-table! db-spec)
 (insert-document!
-  db-spec
-  "Hello!"
-  "joe"
-  "hello/joe"
-  "<div>hello world</div>"
-  (c/to-sql-time (t/today))
-  true
-  "")
+  {:title "Hello!"
+   :author "joe"
+   :path "hello/joe2"
+   :content "<div>hello world</div>"
+   :post_date (c/to-sql-time (t/today))
+   :published true
+   :filename "" })
