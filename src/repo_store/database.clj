@@ -1,5 +1,6 @@
 (ns repo-store.database
   (:require [yesql.core :refer [defquery]]
+            [bugsbio.squirrel :as sq]
             [clojure.java.jdbc :as jdbc]
             [clj-time.coerce :as c]
             [clj-time.core :as t]))
@@ -9,16 +10,17 @@
               :subname "//localhost:5432/jmoon"
               :user "jmoon"})
 
-(defquery create-table! "repo_store/sql/create.sql")
+(defquery create-table! "repo_store/sql/create.sql"
+    {:connection db-spec})
 (defquery insert-document! "repo_store/sql/insert.sql"
     {:connection db-spec})
 
-(create-table! db-spec)
+(create-table!)
 (insert-document!
-  {:title "Hello!"
+  (sq/to-sql {:title "Hello!"
    :author "joe"
-   :path "hello/joe2"
+   :path "hello/joe"
    :content "<div>hello world</div>"
-   :post_date (c/to-sql-time (t/today))
+   :post-date (c/to-sql-time (t/today))
    :published true
-   :filename "" })
+   :filename ""}))
