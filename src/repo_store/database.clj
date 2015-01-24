@@ -36,7 +36,7 @@
   (-> (merge
         defaults
         doc
-        (if-let [post-date (doc :post-date)]
+        (if-let [post-date (doc :date)]
           {:post-date (c/to-sql-time post-date)}))
       sq/to-sql
       insert-document!))

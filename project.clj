@@ -7,6 +7,7 @@
                  [clj-yaml "0.4.0"]
                  [clj-time "0.9.0"]
                  [me.raynes/cegdown "0.1.1"]
+                 [me.raynes/fs "1.4.6"]
                  [org.clojure/clojure "1.6.0"]
                  [org.eclipse.jgit/org.eclipse.jgit.java7 "3.5.0.201409260305-r"]
                  [org.postgresql/postgresql "9.3-1102-jdbc41"]

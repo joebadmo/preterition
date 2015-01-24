@@ -1,19 +1,15 @@
 (ns repo-store.core
   (:require [clojure.string :as string]
+            [clojure.java.io :as io]
+            [me.raynes.fs :as fs]
             [repo-store.config :as config]
             [repo-store.repo :as repo]
             [repo-store.parse :as parse]
             [repo-store.database :as db]))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (repo/get-change-set config/repo))
-
 (def filter-markdown-files (partial filter (partial re-matches #".*\.(md|markdown)$")))
 
-(defn get-contents [file-name]
-  (->> file-name
+(def get-contents #(->> %
     (str config/path-prefix config/repo "/")
     (slurp)))
 
@@ -22,24 +18,43 @@
                   (drop-last s)
                   (string/join "." s)))
 
-(def change-set (repo/get-change-set config/repo))
-(def added (change-set :add))
-(def updated (change-set :edit))
-(def added-markdown-files (filter-markdown-files added))
+(def change-set (repo/get-change-set config/repo config/branch))
 
-(def docs (into {} (map
-                   #(vector
-                      (strip-ext %)
-                      (-> %
-                          (get-contents)
-                          (parse/parse)
-                          (assoc :filename %
-                                 :path (first (string/split % #"\.")))))
-                   added-markdown-files)))
+(defn make-content-map [file-list]
+  (into {}
+        (map
+          #(vector
+             (strip-ext %)
+             (-> %
+                 (get-contents)
+                 (parse/parse)
+                 (assoc :filename %
+                        :path (strip-ext %))))
+          file-list)))
 
-(def titled-docs (remove #(nil? ((second %) :title)) docs))
+(defn slurp-all [dir]
+  (let [current-path (.getPath (fs/file dir))
+        prefix-dir-count (count (string/split current-path #"\/"))]
+    (->> dir
+         (fs/walk
+           (fn [root dirs files]
+             (let [path (.getPath root)
+                   split (string/split path #"\/")
+                   tail (drop prefix-dir-count split)
+                   prefix (string/join "/" tail)]
+               (map #(string/join [prefix "/" %]) files))))
+         flatten
+         filter-markdown-files)))
 
-;(doseq [doc (map val titled-docs)]
-;  (db/insert-document doc))
+(defn create-files [file-list]
+  (let [content-map (make-content-map file-list)]
+    (doseq [doc (map val content-map)]
+      (db/insert-document doc))))
 
-;(pprint docs)
+(defn update-files [file-list]
+  (let [content-map (make-content-map file-list)]
+    (doseq [doc (map val content-map)]
+      (db/update-document doc))))
+
+(-> (slurp-all "repos/joebadmo/joe.xoxomoon.com-content")
+    (update-files))
