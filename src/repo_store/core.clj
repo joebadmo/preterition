@@ -1,6 +1,5 @@
 (ns repo-store.core
   (:require [clojure.string :as string]
-            [clojure.java.io :as io]
             [me.raynes.fs :as fs]
             [repo-store.config :as config]
             [repo-store.repo :as repo]
@@ -56,5 +55,5 @@
     (doseq [doc (map val content-map)]
       (db/update-document doc))))
 
-(-> (slurp-all "repos/joebadmo/joe.xoxomoon.com-content")
-    (update-files))
+; (-> (slurp-all "repos/joebadmo/joe.xoxomoon.com-content")
+;     (update-files))
