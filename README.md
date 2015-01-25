@@ -1,36 +1,15 @@
 # repo-store
 
-FIXME: description
+Configured with a github repository and post-commit hook, it:
 
-## Installation
-
-Download from http://example.com/FIXME.
+1. parses yaml front-matter markdown pages
+2. updates documents in postgres database
+3. provides http api to documents
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar repo-store-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+TODO
 
 ## License
 
-Copyright © 2015 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+MIT
