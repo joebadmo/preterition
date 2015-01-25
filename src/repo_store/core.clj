@@ -8,30 +8,22 @@
 
 (def filter-markdown-files (partial filter (partial re-matches #".*\.(md|markdown)$")))
 
-(def get-contents #(->> %
+(def slurp-file #(->> %
     (str config/path-prefix config/repo "/")
     (slurp)))
 
-(def strip-ext #(as-> % s
-                  (string/split s #"\.")
-                  (drop-last s)
-                  (string/join "." s)))
+(def strip-ext #(->> (string/split % #"\.")
+                     (drop-last)
+                     (string/join ".")))
 
-(def change-set (repo/get-change-set config/repo config/branch))
+(defn get-document [filename]
+  (-> filename
+      slurp-file
+      parse/parse
+      (assoc :filename filename
+             :path (strip-ext filename))))
 
-(defn make-content-map [file-list]
-  (into {}
-        (map
-          #(vector
-             (strip-ext %)
-             (-> %
-                 (get-contents)
-                 (parse/parse)
-                 (assoc :filename %
-                        :path (strip-ext %))))
-          file-list)))
-
-(defn slurp-all [dir]
+(defn get-all-markdown-filenames [dir]
   (let [current-path (.getPath (fs/file dir))
         prefix-dir-count (count (string/split current-path #"\/"))]
     (->> dir
@@ -45,15 +37,32 @@
          flatten
          filter-markdown-files)))
 
-(defn create-files [file-list]
-  (let [content-map (make-content-map file-list)]
-    (doseq [doc (map val content-map)]
-      (db/insert-document doc))))
+(defn create-documents [documents]
+  (doseq [doc documents]
+    (db/insert-document doc)))
 
-(defn update-files [file-list]
-  (let [content-map (make-content-map file-list)]
-    (doseq [doc (map val content-map)]
-      (db/update-document doc))))
+(defn update-documents [documents]
+  (doseq [doc documents]
+    (db/update-document doc)))
 
-; (-> (slurp-all "repos/joebadmo/joe.xoxomoon.com-content")
-;     (update-files))
+(defn delete-documents [file-names]
+  (db/delete-documents (map strip-ext file-names)))
+
+; TODO: parallelize
+(defn apply-change-set [change-set]
+  (if (= change-set :all)
+    (->> (get-all-markdown-filenames (str config/path-prefix config/repo))
+         (map get-document)
+         (create-documents))
+    (do
+      (-> (change-set :delete)
+          (delete-documents))
+      (->> (change-set :add)
+           (map get-document)
+           (create-documents))
+      (->> (change-set :edit)
+           (map get-document)
+           (update-documents)))))
+
+; (def change-set (repo/get-change-set config/repo config/branch))
+; (apply-change-set change-set)
