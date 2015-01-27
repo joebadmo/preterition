@@ -55,8 +55,9 @@
          (map get-document)
          (create-documents))
     (do
-      (-> (change-set :delete)
-          (delete-documents))
+      (let [deletions (change-set :delete)]
+        (when-not (empty? deletions)
+          (delete-documents deletions)))
       (->> (change-set :add)
            (map get-document)
            (create-documents))

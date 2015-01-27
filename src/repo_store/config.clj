@@ -1,5 +1,7 @@
 (ns repo-store.config)
 
 (def path-prefix "./repos/")
-(def repo "joebadmo/joe.xoxomoon.com-content")
+(def username "joebadmo")
+(def repository "joe.xoxomoon.com-content")
+(def repo (str username "/" repository))
 (def branch "repo-store")

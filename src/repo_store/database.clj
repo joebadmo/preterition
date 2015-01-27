@@ -10,12 +10,21 @@
               :subname "//localhost:5432/jmoon"
               :user "jmoon"})
 
-(defquery create-table! "repo_store/sql/create.sql"
+(defquery create-documents-table! "repo_store/sql/create-documents-table.sql"
   {:connection db-spec})
 
-;(create-table!)
+(defquery create-commits-table! "repo_store/sql/create-commits-table.sql"
+  {:connection db-spec})
+
+;(create-commits-table!)
 
 (defquery insert-document! "repo_store/sql/insert.sql"
+  {:connection db-spec})
+
+(defquery insert-commit! "repo_store/sql/insert-commit.sql"
+  {:connection db-spec})
+
+(defquery select-newest-commit "repo_store/sql/select-newest-commit.sql"
   {:connection db-spec})
 
 (defquery select-document-by-path "repo_store/sql/select.sql"
@@ -57,7 +66,18 @@
         sq/to-sql
         update-document!)))
 
-(def delete-documents #(delete-documents! {:paths %}))
+(def delete-documents #(delete-documents! {:paths %})) ; handle nil
+
+(defn insert-commit [commit]
+  (-> commit
+      (merge {:git-commit-time (c/to-sql-time (commit :git-commit-time))})
+      sq/to-sql
+      insert-commit!))
+
+(defn get-newest-commit-hash []
+  (-> (select-newest-commit)
+      first
+      sq/to-clj))
 
 ; (update-document
 ;   {:title "Goodbye!"
