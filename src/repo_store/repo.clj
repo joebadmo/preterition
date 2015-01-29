@@ -9,7 +9,36 @@
 (defn- get-url [repo]
   (str "https://github.com/" repo ".git"))
 
-(def convert-commit-time #(-> % long (* 1000) c/from-long))
+(defn get-repo [repo-name branch]
+  (let [path (str config/path-prefix repo-name)]
+    (do
+      (when (nil? (git/discover-repo path))
+        (git/git-clone-full (get-url repo-name) path))
+      (let [repo (git/load-repo path)]
+        (do
+          (git/git-fetch-all repo)
+          (git/git-checkout repo branch)
+          repo)))))
+
+(defn get-commit [repo commit-hash]
+  (->> (git/git-log repo)
+       (filter #(= commit-hash (.name %)))
+       (first)))
+
+(def get-head-commit #(first (git/git-log %)))
+
+(def get-change-list query/changed-files-between-commits)
+
+(defn get-change-list [repo old-commit new-commit]
+  (let [change-list
+        (query/changed-files-between-commits repo old-commit new-commit)]
+    (reduce
+      (fn [memo [file-name change-type]]
+        (assoc memo change-type (conj (memo change-type) file-name)))
+      {:edit #{} :add #{} :delete #{}}
+      change-list)))
+
+(def ^:private convert-commit-time #(-> % long (* 1000) c/from-long))
 
 (defn get-commit-map [rev-commit]
   {:git-commit-hash (.name rev-commit)
@@ -18,39 +47,6 @@
                         convert-commit-time)
    :username config/username
    :repository config/repository})
-
-(defn get-change-set
-  ([repo-name] (get-change-set repo-name "master"))
-  ([repo-name branch]
-   (let [url (get-url repo-name)
-         path (str config/path-prefix repo-name)]
-     (if (nil? (git/discover-repo path))
-       (do
-         (git/git-clone-full url path)
-         (let [repo (git/load-repo path)]
-           (do
-             (git/git-fetch-all repo)
-             (git/git-checkout repo branch)
-             (-> (git/git-log repo)
-                 first
-                 get-commit-map
-                 db/insert-commit)
-             :all)))
-       (let [repo (git/load-repo path)]
-         (do
-           (git/git-pull repo)
-           (let [log (git/git-log repo)
-                 newest-commit-hash ((db/get-newest-commit-hash) :git-commit-hash) ; TODO: refactor to handle nil
-                 newest-commit (first (filter #(= newest-commit-hash (.name %)) log))
-                 head (first (git/git-log repo))
-                 change-list (query/changed-files-between-commits repo newest-commit head)]
-             (do
-               (db/insert-commit (get-commit-map head))
-               (reduce
-                 (fn [memo [file-name change-type]]
-                   (assoc memo change-type (conj (memo change-type) file-name)))
-                 {:edit #{} :add #{} :delete #{}}
-                 change-list)))))))))
 
 ; (def repo (git/load-repo "repos/joebadmo/joe.xoxomoon.com-content"))
 ; (git/git-checkout repo "repo-store")

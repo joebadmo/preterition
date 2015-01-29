@@ -5,18 +5,16 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]))
 
-(def db-spec {:classname "org.postgresql.Driver"
-              :subprotocol "postgresql"
-              :subname "//localhost:5432/jmoon"
-              :user "jmoon"})
+(def ^:private db-spec {:classname "org.postgresql.Driver"
+                        :subprotocol "postgresql"
+                        :subname "//localhost:5432/jmoon"
+                        :user "jmoon"})
 
 (defquery create-documents-table! "repo_store/sql/create-documents-table.sql"
   {:connection db-spec})
 
 (defquery create-commits-table! "repo_store/sql/create-commits-table.sql"
   {:connection db-spec})
-
-;(create-commits-table!)
 
 (defquery insert-document! "repo_store/sql/insert.sql"
   {:connection db-spec})
@@ -36,27 +34,23 @@
 (defquery delete-documents! "repo_store/sql/delete.sql"
   {:connection db-spec})
 
-(def defaults
+(def ^:private defaults
   {:published true
    :author "Joe Moon"
-   :post-date (c/to-sql-time (t/now))})
+   :post-date (t/now)})
 
-(defn insert-document [doc]
-  (-> (merge
-        defaults
-        doc
-        (if-let [post-date (doc :date)]
-          {:post-date (c/to-sql-time post-date)}))
-      sq/to-sql
-      insert-document!))
+(defn- document-to-sql [doc]
+  (-> (merge defaults doc)
+      (update-in [:post-date] c/to-sql-time)
+      sq/to-sql))
 
-(defn select-document [doc]
+(defn- select-document [doc]
   (select-document-by-path
     {:path doc}
     {:result-set-fn first
      :row-fn sq/to-clj}))
 
-(defn update-document [doc]
+(defn- update-document [doc conn]
   (let [old-doc (select-document (doc :path))
         merged (merge old-doc doc)]
     (-> merged
@@ -64,34 +58,29 @@
           {:post-date (c/to-sql-time (merged :post-date))
            :updated-at (c/to-sql-time (t/now))})
         sq/to-sql
-        update-document!)))
+        update-document! conn)))
 
-(def delete-documents #(delete-documents! {:paths %})) ; handle nil
+(defn- delete-documents [paths conn]
+  (delete-documents! {:paths paths} conn))
 
-(defn insert-commit [commit]
-  (-> commit
-      (merge {:git-commit-time (c/to-sql-time (commit :git-commit-time))})
-      sq/to-sql
-      insert-commit!))
+(defn update [document-set]
+  (let [additions (->> (document-set :add) (map document-to-sql))
+        edits (->> (document-set :edit) (map document-to-sql))
+        deletions (document-set :delete)
+        commit (-> (document-set :git-commit)
+                   (update-in [:git-commit-time] c/to-sql-time)
+                   sq/to-sql)]
+    (jdbc/with-db-transaction [tx db-spec]
+      (doseq [addition additions]
+        (insert-document! addition {:connection tx}))
+      (doseq [edit edits]
+        (update-document edit {:connection tx}))
+      (when (seq deletions)
+        (delete-documents deletions {:connection tx}))
+      (insert-commit! commit {:connection tx}))))
 
-(defn get-newest-commit-hash []
-  (-> (select-newest-commit)
-      first
-      sq/to-clj))
-
-; (update-document
-;   {:title "Goodbye!"
-;    :path "hello/joe/something4"
-;    :content "<div>goodbye world</div>"
-;    :post-date (t/yesterday)
-;    :stuff "farts"})
-;
-; (insert-document
-;   {:title "Hello!"
-;    :author "joe moon"
-;    :path "2"
-;    :content "<div>hello world</div>"
-;    :post-date (t/now)
-;    :published true
-;    :filename "file"
-;    :stuff "farts"})
+(defn get-newest-commit-map []
+  (let [commits (select-newest-commit)]
+    (if (seq commits)
+      (sq/to-clj (first commits))
+      {:git-commit-hash nil}))) ; TODO: fix this

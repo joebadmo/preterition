@@ -6,7 +6,8 @@
             [repo-store.parse :as parse]
             [repo-store.database :as db]))
 
-(def filter-markdown-files (partial filter (partial re-matches #".*\.(md|markdown)$")))
+(def filter-markdown-files
+  (partial filter (partial re-matches #".*\.(md|markdown)$")))
 
 (def slurp-file #(->> %
     (str config/path-prefix config/repo "/")
@@ -37,33 +38,20 @@
          flatten
          filter-markdown-files)))
 
-(defn create-documents [documents]
-  (doseq [doc documents]
-    (db/insert-document doc)))
-
-(defn update-documents [documents]
-  (doseq [doc documents]
-    (db/update-document doc)))
-
-(defn delete-documents [file-names]
-  (db/delete-documents (map strip-ext file-names)))
-
-; TODO: parallelize
-(defn apply-change-set [change-set]
-  (if (= change-set :all)
-    (->> (get-all-markdown-filenames (str config/path-prefix config/repo))
-         (map get-document)
-         (create-documents))
-    (do
-      (let [deletions (change-set :delete)]
-        (when-not (empty? deletions)
-          (delete-documents deletions)))
-      (->> (change-set :add)
+(defn get-document-set []
+  (let [repo (repo/get-repo config/repo config/branch)
+        head-commit (repo/get-head-commit repo)
+        head-commit-map (repo/get-commit-map head-commit)]
+    (if-let [newest-commit-hash ((db/get-newest-commit-map) :git-commit-hash)]
+      (let [newest-commit (repo/get-commit repo newest-commit-hash)
+            change-set (repo/get-change-list repo newest-commit head-commit)]
+        (-> (merge change-set {:git-commit head-commit-map})
+            (update-in [:add] (partial map get-document))
+            (update-in [:edit] (partial map get-document))
+            (update-in [:delete] (partial map strip-ext))))
+      (->> (get-all-markdown-filenames (str config/path-prefix config/repo))
            (map get-document)
-           (create-documents))
-      (->> (change-set :edit)
-           (map get-document)
-           (update-documents)))))
+           (assoc {:git-commit head-commit-map} :add)))))
 
-; (def change-set (repo/get-change-set config/repo config/branch))
-; (apply-change-set change-set)
+(defn on-post []
+  (db/update (get-document-set)))
