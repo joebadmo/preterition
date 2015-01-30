@@ -46,18 +46,23 @@
         head-commit-map (-> (get-commit-map head-commit)
                             (merge (select-keys conf [:repository :username])))]
     (if-let [newest-commit-hash ((db/get-newest-commit-map) :git-commit-hash)]
-      (let [newest-commit (get-commit repo newest-commit-hash)
-            change-set (get-change-list repo newest-commit head-commit)]
-        (-> (merge change-set {:git-commit head-commit-map})
-            (update-in [:add] (partial map get-document))
-            (update-in [:edit] (partial map get-document))
-            (update-in [:delete] (partial map strip-ext))))
+      (if (not= newest-commit-hash (head-commit-map :git-commit-hash))
+        (let [newest-commit (get-commit repo newest-commit-hash)
+              change-set (get-change-list repo newest-commit head-commit)]
+          (-> (merge change-set {:git-commit head-commit-map})
+              (update-in [:add] (partial map get-document))
+              (update-in [:edit] (partial map get-document))
+              (update-in [:delete] (partial map strip-ext)))))
       (->> (get-all-markdown-filenames (str path-prefix (conf :repo)))
            (map (partial get-document (conf :repo)))
            (assoc {:git-commit head-commit-map} :add)))))
 
 (defn on-post [repo]
   (if-let [config (configs repo)]
-    (db/update (get-document-set config))))
+    (if-let [document-set (get-document-set config)]
+      (do
+        (db/update document-set)
+        document-set)
+      "nothing new")))
 
 ;(on-post "joebadmo/joe.xoxomoon.com-content")
