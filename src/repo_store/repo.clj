@@ -1,5 +1,5 @@
 (ns repo-store.repo
-  (:require [repo-store.config :as config]
+  (:require [repo-store.config :refer [path-prefix]]
             [repo-store.database :as db]
             [clj-jgit.porcelain :as git]
             [clj-time.coerce :as c]
@@ -10,7 +10,7 @@
   (str "https://github.com/" repo ".git"))
 
 (defn get-repo [repo-name branch]
-  (let [path (str config/path-prefix repo-name)]
+  (let [path (str path-prefix repo-name)]
     (do
       (when (nil? (git/discover-repo path))
         (git/git-clone-full (get-url repo-name) path))
@@ -44,9 +44,7 @@
   {:git-commit-hash (.name rev-commit)
    :git-commit-time (-> rev-commit
                         .getCommitTime
-                        convert-commit-time)
-   :username config/username
-   :repository config/repository})
+                        convert-commit-time)})
 
 ; (def repo (git/load-repo "repos/joebadmo/joe.xoxomoon.com-content"))
 ; (git/git-checkout repo "repo-store")
