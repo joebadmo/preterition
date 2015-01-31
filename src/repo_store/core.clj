@@ -9,9 +9,9 @@
 (def ^:private filter-markdown-files
   (partial filter (partial re-matches #".*\.(md|markdown)$")))
 
-(defn- slurp-file [repo filename]
+(defn- slurp-file [repo-name filename]
   (->> filename
-       (str path-prefix repo "/")
+       (str path-prefix repo-name "/")
        (slurp)))
 
 (defn- strip-ext [filename]
@@ -19,9 +19,9 @@
        (drop-last)
        (join ".")))
 
-(defn- get-document [repo filename]
+(defn- get-document [repo-name filename]
   (-> filename
-      ((partial slurp-file repo))
+      ((partial slurp-file repo-name))
       parse
       (assoc :filename filename
              :path (strip-ext filename))))
@@ -50,8 +50,8 @@
         (let [newest-commit (get-commit repo newest-commit-hash)
               change-set (get-change-list repo newest-commit head-commit)]
           (-> (merge change-set {:git-commit head-commit-map})
-              (update-in [:add] (partial map get-document))
-              (update-in [:edit] (partial map get-document))
+              (update-in [:add] (partial map (partial get-document (conf :repo))))
+              (update-in [:edit] (partial map (partial get-document (conf :repo))))
               (update-in [:delete] (partial map strip-ext)))))
       (->> (get-all-markdown-filenames (str path-prefix (conf :repo)))
            (map (partial get-document (conf :repo)))

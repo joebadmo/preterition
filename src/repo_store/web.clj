@@ -7,5 +7,5 @@
 
 (defroutes app
   (GET "/" [] "hi")
-  (GET "/repo/:username/:repo" [username repo]
+  (POST "/repo/:username/:repo" [username repo]
         (on-post (str username "/" repo))))
