@@ -3,7 +3,7 @@
             [me.raynes.fs :refer [file walk]]
             [repo-store.config :refer [configs path-prefix]]
             [repo-store.repo :refer :all]
-            [repo-store.parse :refer [parse]]
+            [repo-store.parse :refer [parse strip-ext]]
             [repo-store.database :as db]))
 
 (def ^:private filter-markdown-files
@@ -14,17 +14,9 @@
        (str path-prefix repo-name "/")
        (slurp)))
 
-(defn- strip-ext [filename]
-  (->> (split filename #"\.")
-       (drop-last)
-       (join ".")))
-
 (defn- get-document [repo-name filename]
-  (-> filename
-      ((partial slurp-file repo-name))
-      parse
-      (assoc :filename filename
-             :path (strip-ext filename))))
+  (->> (slurp-file repo-name filename)
+       (parse filename)))
 
 (defn- get-all-markdown-filenames [dir]
   (let [current-path (.getPath (file dir))
@@ -72,4 +64,4 @@
         document-set)
       "nothing new")))
 
-; (on-post "joebadmo/joe.xoxomoon.com-content")
+(on-post "joebadmo/joe.xoxomoon.com-content")

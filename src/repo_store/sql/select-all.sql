@@ -2,7 +2,6 @@ select
   title,
   author,
   path,
-  content,
   post_date,
   published,
   filename

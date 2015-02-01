@@ -8,6 +8,11 @@
 
 (def not-found {:status 404 :body "Not found"})
 
+(defn get-path [uri]
+  (->> (split uri #"\/")
+       (drop 2)
+       (join "/")))
+
 (def get-document
   (GET "/*" {uri :uri}
        (if-let [doc (-> (get-path uri) (db/select-document))]
@@ -23,8 +28,3 @@
 
 (def app (-> app-routes
              wrap-json-response))
-
-(defn get-path [uri]
-  (->> (split uri #"\/")
-       (drop 2)
-       (join "/")))
