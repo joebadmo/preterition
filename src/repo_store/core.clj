@@ -40,21 +40,28 @@
          flatten
          filter-markdown-files)))
 
+(defn get-all-documents [conf]
+  (let [repo-name (conf :repo)]
+    (->> (get-all-markdown-filenames (str path-prefix repo-name))
+         (map (partial get-document repo-name)))))
+
 (defn get-document-set [conf]
   (let [repo (get-repo (conf :repo) (conf :branch))
+        [get-commit get-change-list] (map #(partial % repo) [get-commit get-change-list])
+        get-document (partial get-document (conf :repo))
+        get-documents (partial map get-document)
         head-commit (get-head-commit repo)
         head-commit-map (-> (get-commit-map head-commit)
                             (merge (select-keys conf [:repository :username])))]
     (if-let [newest-commit-hash ((db/get-newest-commit-map) :git-commit-hash)]
       (if (not= newest-commit-hash (head-commit-map :git-commit-hash))
-        (let [newest-commit (get-commit repo newest-commit-hash)
-              change-set (get-change-list repo newest-commit head-commit)]
+        (let [newest-commit (get-commit newest-commit-hash)
+              change-set (get-change-list newest-commit head-commit)]
           (-> (merge change-set {:git-commit head-commit-map})
-              (update-in [:add] (partial map (partial get-document (conf :repo))))
-              (update-in [:edit] (partial map (partial get-document (conf :repo))))
+              (update-in [:add] get-documents)
+              (update-in [:edit] get-documents)
               (update-in [:delete] (partial map strip-ext)))))
-      (->> (get-all-markdown-filenames (str path-prefix (conf :repo)))
-           (map (partial get-document (conf :repo)))
+      (->> (get-all-documents conf)
            (assoc {:git-commit head-commit-map} :add)))))
 
 (defn on-post [repo]
@@ -65,4 +72,4 @@
         document-set)
       "nothing new")))
 
-;(on-post "joebadmo/joe.xoxomoon.com-content")
+; (on-post "joebadmo/joe.xoxomoon.com-content")
