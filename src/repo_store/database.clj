@@ -25,6 +25,9 @@
 (defquery select-newest-commit "repo_store/sql/select-newest-commit.sql"
   {:connection db-spec})
 
+(defquery select-documents "repo_store/sql/select-all.sql"
+  {:connection db-spec})
+
 (defquery select-document-by-path "repo_store/sql/select.sql"
   {:connection db-spec})
 
@@ -44,7 +47,7 @@
       (update-in [:post-date] c/to-sql-time)
       sq/to-sql))
 
-(defn- select-document [doc]
+(defn select-document [doc]
   (select-document-by-path
     {:path doc}
     {:result-set-fn first
