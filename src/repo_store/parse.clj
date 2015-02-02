@@ -25,11 +25,13 @@
                 (strip-ext))}))
 
 (defn parse [filename content]
-  (let [parsed (-> (fm/parse content) (update-in [:alias] #(conj [] %)))]
-    (->
-      (if (-> (split filename #"\/") (first) (= "blog"))
-        (merge parsed (parse-post filename))
-        (merge parsed {:path (strip-ext filename)}))
-      (update-in [:content] md/render)
-      (merge {:filename filename})
-      (clojure.set/rename-keys {:date :post-date :alias :aliases}))))
+  (let [category (first (split filename #"\/"))]
+    (-> (fm/parse content)
+        (update-in [:alias] #(conj [] %))
+        (update-in [:content] md/render)
+        (merge {:filename filename
+                :category category})
+        (clojure.set/rename-keys {:date :post-date :alias :aliases})
+        (#(if (= category "blog")
+          (merge % (parse-post filename))
+          (merge % {:path (strip-ext filename)}))))))
