@@ -44,9 +44,14 @@
    :category nil
    :aliases nil})
 
+(defn- vec-to-array [v]
+  (-> (jdbc/get-connection db-spec)
+      (.createArrayOf "varchar" (into-array String v))))
+
 (defn- document-to-sql [doc]
   (-> (merge defaults doc)
       (update-in [:post-date] c/to-sql-time)
+      (update-in [:aliases] vec-to-array)
       sq/to-sql))
 
 (defn select-document [doc]
