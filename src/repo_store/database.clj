@@ -40,7 +40,9 @@
 (def ^:private defaults
   {:published true
    :author "Joe Moon"
-   :post-date (t/now)})
+   :post-date (t/now)
+   :category nil
+   :aliases nil})
 
 (defn- document-to-sql [doc]
   (-> (merge defaults doc)

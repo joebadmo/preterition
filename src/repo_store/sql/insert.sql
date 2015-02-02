@@ -5,7 +5,9 @@ insert into documents (
   content,
   post_date,
   published,
-  filename
+  filename,
+  category,
+  aliases
 )
 
 values (
@@ -15,5 +17,7 @@ values (
   :content,
   :post_date,
   :published,
-  :filename
+  :filename,
+  :category,
+  :aliases
 );

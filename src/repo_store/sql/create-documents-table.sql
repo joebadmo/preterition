@@ -8,5 +8,7 @@ create table documents (
   created_at     date default current_timestamp,
   updated_at     date default current_timestamp,
   published      boolean default true,
-  filename       varchar(200)
+  filename       varchar(200),
+  category       varchar(80),
+  aliases        varchar(200)[]
 );

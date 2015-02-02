@@ -5,6 +5,8 @@ select
   content,
   post_date,
   published,
-  filename
+  filename,
+  category,
+  aliases
 from documents
 where path = :path
