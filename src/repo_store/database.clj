@@ -26,6 +26,9 @@
   {:connection db-spec})
 
 (defquery select-documents "repo_store/sql/select-all.sql"
+   {:connection db-spec})
+
+(defquery select-documents-by-category "repo_store/sql/select-category.sql"
   {:connection db-spec})
 
 (defquery select-document-by-path "repo_store/sql/select.sql"
@@ -44,6 +47,11 @@
    :category nil
    :aliases nil})
 
+(defn- array-to-vec [a]
+  (->> (.getArray a)
+       (vec)
+       (filter identity)))
+
 (defn- vec-to-array [v]
   (-> (jdbc/get-connection db-spec)
       (.createArrayOf "varchar" (into-array String v))))
@@ -54,14 +62,29 @@
       (update-in [:aliases] vec-to-array)
       sq/to-sql))
 
-(defn select-document [doc]
+(defn- sql-to-document [sql]
+  (-> sql
+      (update-in [:aliases] array-to-vec)
+      sq/to-clj))
+
+(defn get-documents []
+  (select-documents
+    {}
+    {:row-fn sql-to-document}))
+
+(defn get-document [doc]
   (select-document-by-path
     {:path doc}
     {:result-set-fn first
-     :row-fn sq/to-clj}))
+     :row-fn sql-to-document}))
+
+(defn get-documents-by-category [category]
+  (select-documents-by-category
+    {:category category}
+    {:row-fn sql-to-document}))
 
 (defn- update-document [doc conn]
-  (let [old-doc (select-document (doc :path))
+  (let [old-doc (get-document (doc :path))
         merged (merge old-doc doc)]
     (-> merged
         (merge

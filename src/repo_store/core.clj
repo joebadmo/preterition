@@ -14,8 +14,6 @@
        (str path-prefix repo-name "/")
        (slurp)))
 
-(clojure.pprint/pprint (get-document "joebadmo/joe.xoxomoon.com-content" "blog/2011-11-30-amateurs-lament.md"))
-
 (defn- get-document [repo-name filename]
   (->> (slurp-file repo-name filename)
        (parse filename)))
@@ -65,5 +63,3 @@
         (db/update document-set)
         document-set)
       "nothing new")))
-
-(on-post "joebadmo/joe.xoxomoon.com-content")

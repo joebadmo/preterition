@@ -21,7 +21,7 @@
                            (map #(Integer. %))
                            (apply t/date-time))
                 :path (->> (concat [dir] date-tokens [slug]) (join "/"))})
-        (update-in [:aliases] #(conj % (join "/" [dir slug]))))))
+        (update-in [:alias] #(conj % (str "/" dir "/" slug))))))
 
 (defn parse [filename content]
   (-> (fm/parse content)
@@ -29,7 +29,7 @@
       (update-in [:content] md/render)
       (merge {:filename filename
               :category (first (split filename #"\/"))})
-      (clojure.set/rename-keys {:date :post-date :alias :aliases})
       (#(if (= (% :category) "blog")
         (parse-post % filename)
-        (merge % {:path (strip-ext filename)})))))
+        (merge % {:path (strip-ext filename)})))
+      (clojure.set/rename-keys {:date :post-date :alias :aliases})))
