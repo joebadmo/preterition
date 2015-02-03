@@ -23,8 +23,13 @@
                 :path (->> (concat [dir] date-tokens [slug]) (join "/"))})
         (update-in [:alias] #(conj % (str "/" dir "/" slug))))))
 
+(defn- string-to-date [date-string]
+  (let [[month day year] (map #(Integer. %) (split date-string #"\/"))]
+    (t/date-time year month day)))
+
 (defn parse [filename content]
   (-> (fm/parse content)
+      (update-in [:date] string-to-date)
       (update-in [:alias] #(conj [] %))
       (update-in [:content] md/render)
       (merge {:filename filename
