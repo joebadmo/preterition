@@ -24,11 +24,18 @@
         (update-in [:alias] #(conj % (str "/" dir "/" slug))))))
 
 (defn- string-to-date [date-string]
-  (let [[month day year] (map #(Integer. %) (split date-string #"\/"))]
-    (t/date-time year month day)))
+  (if (nil? date-string)
+    (t/now)
+    (let [[month day year] (map #(Integer. %) (split date-string #"\/"))]
+      (t/date-time year month day))))
+
+(def ^:private parse-base
+  {:title nil
+   :date nil})
 
 (defn parse [filename content]
-  (-> (fm/parse content)
+  (-> parse-base
+      (merge (fm/parse content))
       (update-in [:date] string-to-date)
       (update-in [:alias] #(conj [] %))
       (update-in [:content] md/render)
