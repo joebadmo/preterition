@@ -13,6 +13,7 @@
                  [org.eclipse.jgit/org.eclipse.jgit.java7 "3.5.0.201409260305-r"]
                  [org.postgresql/postgresql "9.3-1102-jdbc41"]
                  [ring/ring-core "1.3.2"]
+                 [ring-cors "0.1.6"]
                  [ring/ring-json "0.3.1"]
                  [ring/ring-jetty-adapter "1.3.2"]
                  [squirrel "0.1.2-yesql-0.1.0"]
