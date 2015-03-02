@@ -24,11 +24,12 @@
     (->> dir
          (walk
            (fn [root dirs files]
-             (let [path (.getPath root)
-                   split (split path #"\/")
-                   tail (drop prefix-dir-count split)
-                   prefix (join "/" tail)]
-               (map #(join [prefix "/" %]) files))))
+             (let [root-path (.getPath root)]
+               (map #(-> (str root-path "/" %)
+                         (split #"\/")
+                         ((partial drop prefix-dir-count))
+                         ((partial join "/")))
+                    files))))
          flatten
          filter-markdown-files)))
 
