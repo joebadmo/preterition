@@ -1,6 +1,6 @@
 (ns repo-store.markdown
-  (:require [me.raynes.cegdown :as md]))
+  (:use markdown.core))
 
-(def pegdown-options [:autolinks :fenced-code-blocks :strikethrough :smartypants])
+(def options [:heading-anchors true])
 
-(def render #(md/to-html % pegdown-options))
+(def render #(apply md-to-html-string (into [%] options)))
