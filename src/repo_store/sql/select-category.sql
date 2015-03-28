@@ -3,6 +3,7 @@ select
   author,
   path,
   post_date,
+  description,
   published,
   filename,
   category,

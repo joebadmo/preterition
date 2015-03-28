@@ -44,6 +44,7 @@
   {:published true
    :author "Joe Moon"
    :post-date (t/now)
+   :description nil
    :category nil
    :aliases nil})
 

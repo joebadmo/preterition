@@ -3,6 +3,7 @@ update documents
     title = :title,
     author = :author,
     content = :content,
+    description = :description,
     post_date = :post_date,
     published = :published,
     filename = :filename,
