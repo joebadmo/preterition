@@ -1,6 +1,10 @@
 (ns repo-store.markdown
-  (:use markdown.core))
+  (:require [me.raynes.cegdown :as md]
+            [hickory.core :refer [parse-fragment as-hiccup]]))
 
-(def options [:heading-anchors true])
+(def options [:smartypants])
 
-(def render #(apply md-to-html-string (into [%] options)))
+(def render #(-> %
+                 (md/to-html options)
+                 (parse-fragment)
+                 ((partial map as-hiccup))))

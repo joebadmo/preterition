@@ -4,10 +4,12 @@
   :license {:name "MIT"
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[clj-jgit "0.8.4"]
-                 [clj-yaml "0.4.0"]
                  [clj-time "0.9.0"]
+                 [clj-yaml "0.4.0"]
+                 [com.taoensso/nippy "2.8.0"]
                  [compojure "1.3.1"]
-                 [markdown-clj "0.9.63"]
+                 [hickory "0.5.4"]
+                 [me.raynes/cegdown "0.1.1"]
                  [me.raynes/fs "1.4.6"]
                  [org.clojure/clojure "1.6.0"]
                  [org.postgresql/postgresql "9.3-1102-jdbc41"]

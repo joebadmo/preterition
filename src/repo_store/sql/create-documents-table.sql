@@ -1,6 +1,6 @@
 create table documents (
   id             serial primary key,
-  content        text,
+  content        bytea,
   description    text,
   title          varchar(200) not null,
   author         varchar(80) not null,

@@ -3,7 +3,8 @@
             [bugsbio.squirrel :as sq]
             [clojure.java.jdbc :as jdbc]
             [clj-time.coerce :as c]
-            [clj-time.core :as t]))
+            [clj-time.core :as t]
+            [taoensso.nippy :as nippy]))
 
 (def ^:private db-spec {:classname "org.postgresql.Driver"
                         :subprotocol "postgresql"
@@ -61,6 +62,7 @@
   (-> (merge defaults doc)
       (update-in [:post-date] c/to-sql-time)
       (update-in [:aliases] vec-to-array)
+      (update-in [:content] nippy/freeze)
       sq/to-sql))
 
 (defn- sql-to-document [sql]
@@ -77,7 +79,7 @@
   (select-document-by-path
     {:path doc}
     {:result-set-fn first
-     :row-fn sql-to-document}))
+     :row-fn #(-> % sql-to-document (update-in [:content] nippy/thaw))}))
 
 (defn get-documents-by-category [category]
   (select-documents-by-category
