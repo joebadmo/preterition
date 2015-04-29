@@ -2,6 +2,10 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [clojure.string :refer [split join]]
+            [clojure.zip :refer [end? insert-child root] :as zip]
+            [hickory.zip :refer [hickory-zip]]
+            [hickory.select :refer [attr until]]
+            [hickory.convert :refer [hiccup-fragment-to-hickory hickory-to-hiccup]]
             [repo-store.core :refer [on-post]]
             [repo-store.database :as db]
             [ring.middleware.json :refer [wrap-json-response]]))
@@ -13,6 +17,41 @@
        (drop 2)
        (join "/")))
 
+(def ^:private is-homework-list-node (attr :name (partial = "homework-list")))
+
+(defn get-homework-list-node [loc]
+  (let [node (until zip/next loc #(or (end? %) (is-homework-list-node %)))]
+    (if (is-homework-list-node node) node nil)))
+
+(defn make-list-item [item]
+  [:li {}
+   [:em {} (:title item)]
+   " &mdash; "
+   [:a {:href (str "/" (:path item))} (.toString (:post-date item))]
+   [:br]
+   (:description item)])
+
+(defn- add-prose-listing [content]
+  (let [hw-list (-> (db/get-documents-by-category "prose")
+                    ((partial map make-list-item))
+                    ((fn [list] (into [:ul {}] list)))
+                    vector
+                    hiccup-fragment-to-hickory
+                    first)]
+    (if-let [hw-list-node (-> (hiccup-fragment-to-hickory [content])
+                              first
+                              hickory-zip
+                              get-homework-list-node)]
+      (-> hw-list-node
+          (insert-child hw-list)
+          root
+          hickory-to-hiccup)
+      content)))
+
+(defn- get-index []
+  (-> (db/get-document "index")
+      (update-in [:content] add-prose-listing)))
+
 (def get-document
   (GET "/*" {uri :uri}
        (if-let [doc (-> (get-path uri) (db/get-document))]
@@ -23,6 +62,7 @@
   (POST "/repo/:username/:repo" [username repo]
         (on-post (str username "/" repo)))
   (GET "/documents" [] {:body (db/get-documents)})
+  (GET "/document/index" [] {:body (get-index)})
   (context "/document" [] get-document)
   (GET "/category/:category" [category] {:body (db/get-documents-by-category category)}))
 
