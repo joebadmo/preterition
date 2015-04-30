@@ -23,21 +23,26 @@
       loc)))
 
 (defn- add-heading-names [zipper]
-  (until #(zip/next (if (is-heading %) (add-heading-name %) %))
-         zipper
-         end?))
+  (-> (until #(zip/next (if (is-heading %) (add-heading-name %) %))
+             zipper
+             end?)
+      root
+      hickory-zip))
 
 (defn- is-empty-p-tag [loc]
   (and ((tag :p) loc) (nil? (-> loc node :content))))
 
 (def ^:private select-next-empty-p (partial select-next-loc is-empty-p-tag))
 
+(defn- remove-next-empty-p [loc]
+  (if-let [t (select-next-empty-p loc)]
+    (zip/remove t)
+    (until zip/next loc end?)))
+
 (defn- remove-empty-p-tags [zipper]
-  (until #(if-let [t (select-next-empty-p %)]
-                     (zip/remove t)
-                     (until zip/next % end?))
-         zipper
-         end?))
+  (-> (until remove-next-empty-p zipper end?)
+      root
+      hickory-zip))
 
 (defn- wrap [v]
   {:type :element, :attrs nil, :tag :div, :content v})
