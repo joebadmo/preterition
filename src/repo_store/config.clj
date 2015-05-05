@@ -1,5 +1,7 @@
 (ns repo-store.config)
 
+(def downloads-dir "resources/assets")
+
 (def path-prefix "./repos/")
 
 (def ^:private raw-configs [{:username "joebadmo"

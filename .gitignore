@@ -9,3 +9,4 @@ pom.xml.asc
 /.nrepl-port
 /repos
 todo.md
+resources/assets

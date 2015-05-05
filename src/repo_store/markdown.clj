@@ -1,10 +1,12 @@
 (ns repo-store.markdown
-  (:require [clojure.zip :refer [edit end? insert-child node root] :as zip]
+  (:require [clojure.string :as string]
+            [clojure.zip :refer [edit end? insert-child node root] :as zip]
             [me.raynes.cegdown :as md]
             [hickory.convert :refer [hickory-to-hiccup]]
             [hickory.core :refer [parse-fragment as-hickory]]
             [hickory.select :refer [tag until select-next-loc] :as select]
-            [hickory.zip :refer [hickory-zip]]))
+            [hickory.zip :refer [hickory-zip]]
+            [repo-store.assets :refer [make-local-copy]]))
 
 (def ^:private options [:smartypants])
 
@@ -29,6 +31,21 @@
       root
       hickory-zip))
 
+(def ^:private select-next-img (partial select-next-loc (tag :img)))
+
+(defn- replace-image-src [loc]
+  (edit loc (fn [l] (update-in l [:attrs] (fn [attrs] (update-in attrs [:src] make-local-copy))))))
+
+(defn- replace-next-image [loc]
+  (if-let [t (select-next-img loc)]
+    (-> t replace-image-src zip/next)
+    (until zip/next loc end?)))
+
+(defn- replace-images [zipper]
+  (-> (until replace-next-image zipper end?)
+      root
+      hickory-zip))
+
 (defn- is-empty-p-tag [loc]
   (and ((tag :p) loc) (nil? (-> loc node :content))))
 
@@ -49,6 +66,7 @@
 
 (def render #(-> %
                  (md/to-html options)
+                 (string/replace #"\n" "")
                  (parse-fragment)
                  ((partial map as-hickory))
                  vec
@@ -56,5 +74,6 @@
                  hickory-zip
                  remove-empty-p-tags
                  add-heading-names
+                 replace-images
                  root
                  hickory-to-hiccup))
