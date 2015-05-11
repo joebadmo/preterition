@@ -1,8 +1,8 @@
-(ns repo-store.parse
+(ns preterition.parse
   (:require [clojure.string :refer [join split]]
             [clj-time.core :as t]
-            [repo-store.front-matter :as fm]
-            [repo-store.markdown :as md]))
+            [preterition.front-matter :as fm]
+            [preterition.markdown :as md]))
 
 (defn strip-ext [filename]
   (->> (split filename #"\.")

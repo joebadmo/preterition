@@ -1,6 +1,6 @@
-(ns repo-store.repo
-  (:require [repo-store.config :refer [path-prefix]]
-            [repo-store.database :as db]
+(ns preterition.repo
+  (:require [preterition.config :refer [path-prefix]]
+            [preterition.database :as db]
             [clj-jgit.porcelain :as git]
             [clj-time.coerce :as c]
             [clj-time.core :as t]

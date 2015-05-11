@@ -1,4 +1,4 @@
-# repo-store
+# preterition
 
 Configured with a github repository and post-commit hook, it:
 

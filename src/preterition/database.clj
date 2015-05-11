@@ -1,4 +1,4 @@
-(ns repo-store.database
+(ns preterition.database
   (:require [yesql.core :refer [defquery]]
             [bugsbio.squirrel :as sq]
             [clojure.java.jdbc :as jdbc]
@@ -11,34 +11,34 @@
                         :subname "//localhost:5432/jmoon"
                         :user "jmoon"})
 
-(defquery create-documents-table! "repo_store/sql/create-documents-table.sql"
+(defquery create-documents-table! "preterition/sql/create-documents-table.sql"
   {:connection db-spec})
 
-(defquery create-commits-table! "repo_store/sql/create-commits-table.sql"
+(defquery create-commits-table! "preterition/sql/create-commits-table.sql"
   {:connection db-spec})
 
-(defquery insert-document! "repo_store/sql/insert.sql"
+(defquery insert-document! "preterition/sql/insert.sql"
   {:connection db-spec})
 
-(defquery insert-commit! "repo_store/sql/insert-commit.sql"
+(defquery insert-commit! "preterition/sql/insert-commit.sql"
   {:connection db-spec})
 
-(defquery select-newest-commit "repo_store/sql/select-newest-commit.sql"
+(defquery select-newest-commit "preterition/sql/select-newest-commit.sql"
   {:connection db-spec})
 
-(defquery select-documents "repo_store/sql/select-all.sql"
+(defquery select-documents "preterition/sql/select-all.sql"
    {:connection db-spec})
 
-(defquery select-documents-by-category "repo_store/sql/select-category.sql"
+(defquery select-documents-by-category "preterition/sql/select-category.sql"
   {:connection db-spec})
 
-(defquery select-document-by-path "repo_store/sql/select.sql"
+(defquery select-document-by-path "preterition/sql/select.sql"
   {:connection db-spec})
 
-(defquery update-document! "repo_store/sql/update.sql"
+(defquery update-document! "preterition/sql/update.sql"
   {:connection db-spec})
 
-(defquery delete-documents! "repo_store/sql/delete.sql"
+(defquery delete-documents! "preterition/sql/delete.sql"
   {:connection db-spec})
 
 (def ^:private defaults

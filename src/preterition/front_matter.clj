@@ -1,4 +1,4 @@
-(ns repo-store.front-matter
+(ns preterition.front-matter
   (:require [clj-yaml.core :as yaml]
             [clojure.string :as str]))
 

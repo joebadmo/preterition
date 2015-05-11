@@ -1,3 +1,3 @@
-# Introduction to repo-store
+# Introduction to preterition
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)

@@ -1,10 +1,10 @@
-(ns repo-store.core
+(ns preterition.core
   (:require [clojure.string :refer [join split]]
             [me.raynes.fs :refer [file walk]]
-            [repo-store.config :refer [configs path-prefix]]
-            [repo-store.repo :refer :all]
-            [repo-store.parse :refer [parse strip-ext]]
-            [repo-store.database :as db]))
+            [preterition.config :refer [configs path-prefix]]
+            [preterition.repo :refer :all]
+            [preterition.parse :refer [parse strip-ext]]
+            [preterition.database :as db]))
 
 (def ^:private filter-markdown-files
   (partial filter (partial re-matches #".*\.(md|markdown)$")))

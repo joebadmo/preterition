@@ -1,6 +1,6 @@
-(ns repo-store.config)
+(ns preterition.config)
 
-(def downloads-dir "resources/assets")
+(def downloads-dir "images")
 
 (def path-prefix "./repos/")
 

@@ -1,4 +1,4 @@
-(ns repo-store.markdown
+(ns preterition.markdown
   (:require [clojure.string :as string]
             [clojure.zip :refer [edit end? insert-child node root] :as zip]
             [me.raynes.cegdown :as md]
@@ -6,7 +6,7 @@
             [hickory.core :refer [parse-fragment as-hickory]]
             [hickory.select :refer [tag until select-next-loc] :as select]
             [hickory.zip :refer [hickory-zip]]
-            [repo-store.assets :refer [make-local-copy]]))
+            [preterition.images :refer [make-local-copy]]))
 
 (def ^:private options [:smartypants])
 
