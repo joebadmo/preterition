@@ -11,11 +11,12 @@
             [optimus.assets :as assets]
             [optimus.optimizations :as optimizations]
             [optimus.strategies :as strategies]
+            [preterition.config :refer [env]]
             [preterition.core :refer [on-post]]
             [preterition.database :as db]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
-            [ring.util.response :refer [response]])
+            [ring.util.response :refer [response file-response content-type]])
   (import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (def fourohfour (not-found "Not found"))
@@ -87,6 +88,7 @@
     (context "/document" [] get-document)
     (GET "/category/:category" [category] {:body (db/get-documents-by-category category)}))
   (resources "/" {:root ""})
+  (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
   (ANY "/*" [] fourohfour))
 
 (def cors-headers
@@ -103,6 +105,13 @@
         merge cors-headers))))
 
 (def app (-> api-routes
-             (optimus/wrap get-assets optimizations/all strategies/serve-frozen-assets)
+             (optimus/wrap
+               get-assets
+               (if (= env :dev)
+                 optimizations/none
+                 optimizations/all)
+               (if (= env :dev)
+                 strategies/serve-live-assets
+                 strategies/serve-frozen-assets))
              wrap-content-type
              wrap-cors))

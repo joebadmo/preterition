@@ -38,7 +38,7 @@
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src"]
-              :figwheel true
+              :figwheel { :on-jsload "preterition.client.core/on-jsload" }
               :compiler {:main preterition.client.core
                          :asset-path "js/out"
                          :output-to "resources/js/main.js"}

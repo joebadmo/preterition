@@ -1,5 +1,7 @@
 (ns preterition.config)
 
+(def env :dev)
+
 (def downloads-dir "images")
 
 (def path-prefix "./repos/")

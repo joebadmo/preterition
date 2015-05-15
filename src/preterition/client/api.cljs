@@ -6,27 +6,24 @@
             [cognitect.transit :refer [read reader]]
             [hickory.render :refer [hiccup-to-html]]))
 
-(def host "http://localhost:3449/")
+(def ^:private host "http://localhost:3449/")
 
-(def r (reader :json))
+(def ^:private r (reader :json))
 
-(defn deserialize [raw]
-  (read r raw))
+(defn- deserialize [raw] (read r raw))
 
 (defn request [path]
   (let [url (str host "api/" path)]
     (http/get url {:with-credentials? false
-                   :channel (chan 1 (map #(-> % :body deserialize)))})))
+                   :channel (chan 1 (map #(-> % :body)))})))
 
 (def ^:private convert-hiccup-to-html #(-> % vector hiccup-to-html))
 
 (defn request-doc [path]
-  (let [url (str host "api/document/" path)]
-    (http/get url {:with-credentials? false
-                   :channel (chan 1 (map #(-> %
-                                              :body
-                                              deserialize
-                                              (update-in [:content] convert-hiccup-to-html))))})))
+  (go
+    (-> (<! (request (str "document/" (if (not-empty path) path "index"))))
+        deserialize
+        (update-in [:content] convert-hiccup-to-html))))
 
 (def ^:private memo (atom {}))
 
@@ -34,8 +31,6 @@
   (join "/" (filter not-empty [category path])))
 
 (defn get-route-data
-  ([]
-   (get-route-data nil "index"))
   ([category]
    (go
      (if-let [cached (find @memo category)]
