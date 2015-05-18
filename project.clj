@@ -40,6 +40,6 @@
               :source-paths ["src"]
               :figwheel { :on-jsload "preterition.client.core/on-jsload" }
               :compiler {:main preterition.client.core
-                         :asset-path "js/out"
+                         :asset-path "/js/out"
                          :output-to "resources/js/main.js"}
              }]})

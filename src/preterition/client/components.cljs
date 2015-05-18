@@ -1,5 +1,8 @@
 (ns preterition.client.components
-  (:require [quiescent.core :as q]
+  (:require [clojure.string :refer [blank?]]
+            [preterition.client.scroll :refer [scroll-watch scroll-unwatch]]
+            [preterition.util.date :refer [format-date]]
+            [quiescent.core :as q]
             [quiescent.dom :as dom]))
 
 (q/defcomponent Home [loading]
@@ -31,7 +34,13 @@
         nil
         nav-items))))
 
-(q/defcomponent Index [content]
+(q/defcomponent Navbar [{:keys [data loading]}]
+  (Nav (concat [(Home loading)] (map NavItem data))))
+
+(q/defcomponent Index
+  :on-mount (fn [] (scroll-watch ["about" "code" "prose"]))
+  :on-unmount (fn [] (scroll-unwatch ["about" "code" "prose"]))
+  [content]
   (dom/div
     nil
     (dom/section
@@ -45,28 +54,61 @@
     (dom/article
       {:dangerouslySetInnerHTML {:__html content}})))
 
-(q/defcomponent Page [content nav-data loading]
-  (dom/div
-    {:className "container"}
-    (Nav (concat [(Home loading)] (map NavItem nav-data)))
-    (dom/main
+(q/defcomponent PostItem [{:keys [path title]}]
+  (dom/li
+    nil
+    (dom/a {:href path :title title} title)))
+
+(q/defcomponent Listing [{:keys [title children]}]
+  (dom/article
+    nil
+    (dom/header
       nil
-      (Index content)
-      (dom/footer
-        nil
-        "© 2013 Joe Moon"
-        (apply
-          dom/ul
-          nil
-          (map
-            (fn [{:keys [href target icon]}]
-              (dom/li
-                nil
-                (dom/a
-                  {:href href :target target}
-                  (dom/i
-                    {:className icon}))))
+      (dom/h2 nil title))
+    (apply dom/ul nil children)))
+
+(q/defcomponent Post [{:keys [content title post-date]}]
+  (dom/article
+    nil
+    (dom/header
+      nil
+      (dom/h2 nil title)
+      (dom/time nil (format-date post-date)))
+    (dom/div
+      {:dangerouslySetInnerHTML {:__html content}})))
+
+(q/defcomponent Footer []
+  (dom/footer
+    nil
+    "© 2015 Joe Moon"
+    (apply
+      dom/ul
+      nil
+      (map
+        (fn [{:keys [href target icon]}]
+          (dom/li
+            nil
+            (dom/a
+              {:href href :target target}
+              (dom/i
+                {:className icon}))))
         [{:href "mailto:joe@xoxomoon" :target "blank" :icon "icon-mail-squared"}
          {:href "https://github.com/joebadmo" :icon "icon-github-squared"}
          {:href "https://twitter.com/joebadmo" :icon "icon-twitter-squared"}
-         {:href "http://www.linkedin.com/in/joemoon" :icon "icon-linkedin-squared"}]))))))
+         {:href "http://www.linkedin.com/in/joemoon" :icon "icon-linkedin-squared"}]))))
+
+(q/defcomponent Main [{:keys [title nav-data loading route]}]
+  (dom/div
+    {:className "container"}
+    (Navbar {:data nav-data :loading loading})
+    (dom/main
+      nil
+      (let [{:keys [category path data]} route]
+        (cond
+          (every? blank? [category path])
+          (Index (-> route :data :content))
+          (blank? path)
+          (Listing {:title category
+                    :children (-> data ((partial map PostItem)))})
+          :else (Post data)))
+      (Footer))))

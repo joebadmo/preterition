@@ -6,7 +6,6 @@
 
 (defn scroll-to-fragment [fragment]
   (let [fragment-string (second (split fragment "#"))]
-    (prn fragment-string)
     (if-let [element (.querySelector js/document (str "[name=\"" fragment-string "\"]"))]
       (.scroll js/window 0 element.offsetTop)
       (.scroll js/window 0 0))))

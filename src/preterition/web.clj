@@ -86,7 +86,7 @@
     (GET "/documents" [] {:body (db/get-documents)})
     (GET "/document/index" [] {:body (get-index)})
     (context "/document" [] get-document)
-    (GET "/category/:category" [category] {:body (db/get-documents-by-category category)}))
+    (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)}))
   (resources "/" {:root ""})
   (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
   (ANY "/*" [] fourohfour))

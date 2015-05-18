@@ -15,36 +15,34 @@
 (defn request [path]
   (let [url (str host "api/" path)]
     (http/get url {:with-credentials? false
-                   :channel (chan 1 (map #(-> % :body)))})))
+                   :channel (chan 1 (map #(-> % :body deserialize)))})))
 
 (def ^:private convert-hiccup-to-html #(-> % vector hiccup-to-html))
 
 (defn request-doc [path]
   (go
     (-> (<! (request (str "document/" (if (not-empty path) path "index"))))
-        deserialize
         (update-in [:content] convert-hiccup-to-html))))
 
 (def ^:private memo (atom {}))
 
-(defn get-route-key [{:keys [category path]}]
-  (join "/" (filter not-empty [category path])))
+(defn cached? [{:keys [category path]}]
+  (->> [category path]
+       (filter not-empty)
+       (join "/")
+       (contains? @memo)))
 
-(defn get-route-data
-  ([category]
-   (go
-     (if-let [cached (find @memo category)]
-       (val cached)
-       (let [res (<! (request (str "category/" category)))]
-         (swap! memo assoc category res)
-         res))))
-  ([category path]
-   (go
-     (let [full-path (->> [category path]
-                          (filter not-empty)
-                          (join "/"))]
-       (if-let [cached (find @memo full-path)]
-         (val cached)
-         (let [res (<! (request-doc full-path))]
-           (swap! memo assoc full-path res)
-           res))))))
+(defn get-route-data [{:keys [category path]}]
+  (go
+    (let [full-path (->> [category path]
+                         (filter not-empty)
+                         (join "/"))]
+      (if-let [cached (find @memo full-path)]
+        (val cached)
+        (if (and (empty? path) (not-empty category))
+          (let [res (<! (request (str "category/" category)))]
+            (swap! memo assoc category res)
+            res)
+          (let [res (<! (request-doc full-path))]
+            (swap! memo assoc full-path res)
+            res))))))

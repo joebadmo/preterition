@@ -15,20 +15,13 @@
 
 (def router (chan))
 
-(defn- make-title [category fragment]
-  (let [tail (-> fragment (split "#") second)]
-    (join " | " (filter not-empty ["joe.xoxomoon.com" category tail]))))
-
 (go
   (while true
     (let [fragment (<! scroll-events)
           path (.-pathname (.-location js/window))
           oldState (js->clj (.-state history) :keywordize-keys true)
-          newState (assoc oldState :fragment fragment)
-          title (make-title "" fragment)]
-      (put! router {:fragment fragment
-                    :title title
-                    :type :scroll})
+          newState (assoc oldState :fragment fragment)]
+      (put! router {:fragment fragment :type :scroll})
       (. history (replaceState (clj->js newState) nil (str path fragment))))))
 
 (defn handle-click [e]
@@ -42,11 +35,9 @@
             [category & path-tokens] (-> (split full-path #"/") ((partial remove empty?)))
             path (join "/" path-tokens)
             fragment (.-hash target)
-            title (make-title category fragment)
             route {:category (if category category "")
                    :path path
                    :fragment fragment
-                   :title title
                    :type :click}]
         (put! router route)
         (. history (pushState (clj->js route) nil (str full-path fragment)))))))
@@ -54,6 +45,13 @@
 (defn handle-pop [e]
   (let [route (js->clj (.-state e) :keywordize-keys true)]
     (put! router (assoc route :type :pop))))
+
+(defn set-title! [route]
+  (->> ["joe.xoxomoon.com" (-> route :category) (-> route :fragment (split "#") second) (-> route :data :title)]
+       (filter not-empty)
+       distinct
+       (join " | ")
+       (set! (.-title js/document))))
 
 (defn start []
   (events/listen js/document "click" handle-click)
@@ -66,8 +64,7 @@
         fragment (.-hash location)]
     (put! router {:category category
                   :path path
-                  :fragment fragment
-                  :title "joe.xoxomoon.com"})))
+                  :fragment fragment})))
 
 (defn stop []
   (events/removeAll js/document "click")
