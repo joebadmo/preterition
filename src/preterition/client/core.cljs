@@ -56,11 +56,15 @@
 
 (add-watch application-state :watcher
   (fn [key atom old-state new-state]
-    (set-title! (-> new-state :route))
-    (when (-> new-state :route)
+    (when-let [route (new-state :route)]
+      (set-title! route)
       (q/render (Main new-state) root)
-      (if (= (-> new-state :event-type) :click)
-        (scroll-to-fragment (-> new-state :route :fragment))))))
+      (prn (render-to-string new-state))
+      (if (= (new-state :event-type) :click)
+        (scroll-to-fragment (route :fragment))))))
+
+(defn render-to-string [state]
+  (.renderToString js/React (Main state)))
 
 (defn on-jsload []
   (stop)
