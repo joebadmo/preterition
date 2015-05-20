@@ -1,8 +1,12 @@
 (defproject preterition "0.1.0-SNAPSHOT"
+
   :description "Store documents from a git repository in a database."
+
   :url "https://joe.xoxomoon.com"
+
   :license {:name "MIT"
             :url "http://opensource.org/licenses/MIT"}
+
   :dependencies [[cljs-http "0.1.25"]
                  [clj-jgit "0.8.4"]
                  [clj-time "0.9.0"]
@@ -26,15 +30,23 @@
                  [ring/ring-jetty-adapter "1.3.2"]
                  [squirrel "0.1.2-yesql-0.1.0"]
                  [yesql "0.5.0-beta2"]]
+
   :main ^:skip-aot preterition.core
+
   :target-path "target/%s"
+
   :plugins [[lein-ring "0.8.11"]
             [lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.1"]]
+
   :clean-targets ^{:protect false} [:target-path "resources/js/out"]
+
   :figwheel {:ring-handler preterition.web/app}
+
   :ring {:handler preterition.web/app}
+
   :profiles {:uberjar {:aot :all}}
+
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src"]
