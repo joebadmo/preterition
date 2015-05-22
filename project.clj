@@ -16,6 +16,7 @@
                  [com.taoensso/nippy "2.9.0-RC2"]
                  [compojure "1.3.4"]
                  [digest "1.4.4"]
+                 [hiccup "1.0.5"]
                  [hickory "0.5.4"]
                  [me.raynes/cegdown "0.1.1"]
                  [me.raynes/fs "1.4.6"]
@@ -36,10 +37,10 @@
   :target-path "target/%s"
 
   :plugins [[lein-ring "0.8.11"]
-            [lein-cljsbuild "1.0.5"]
-            [lein-figwheel "0.3.1"]]
+            [lein-cljsbuild "1.0.6"]
+            [lein-figwheel "0.3.3"]]
 
-  :clean-targets ^{:protect false} [:target-path "resources/js/out"]
+  :clean-targets ^{:protect false} [:target-path "resources/js"]
 
   :figwheel {:ring-handler preterition.web/app}
 
@@ -49,9 +50,17 @@
 
   :cljsbuild {
     :builds [{:id "dev"
-              :source-paths ["src"]
+              :source-paths ["src/preterition/client"]
               :figwheel { :on-jsload "preterition.client.core/on-jsload" }
               :compiler {:main preterition.client.core
                          :asset-path "/js/out"
-                         :output-to "resources/js/main.js"}
-             }]})
+                         :output-dir "resources/js/out/dev"
+                         :optimizations :whitespace
+                         :output-to "resources/js/main.js"}}
+             {:id "prod"
+              :figwheel false
+              :source-paths ["src/preterition/client"]
+              :compiler {:source-map "resources/js/main.js.map"
+                         :optimizations :advanced
+                         :output-dir "resources/js/out"
+                         :output-to "resources/js/main.js"} }]})
