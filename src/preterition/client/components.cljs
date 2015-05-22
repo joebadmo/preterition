@@ -38,8 +38,8 @@
   (Nav (concat [(Home loading)] (map NavItem data))))
 
 (q/defcomponent Index
-  :on-mount (fn [] (scroll-watch ["about" "code" "prose"]))
-  :on-unmount (fn [] (scroll-unwatch ["about" "code" "prose"]))
+  :on-mount (fn [] (if js/document (scroll-watch ["about" "code" "prose"])))
+  :on-unmount (fn [] (if js/document (scroll-unwatch ["about" "code" "prose"])))
   [content]
   (dom/div
     nil

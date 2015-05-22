@@ -54,13 +54,20 @@
               :figwheel { :on-jsload "preterition.client.core/on-jsload" }
               :compiler {:main preterition.client.core
                          :asset-path "/js/out"
-                         :output-dir "resources/js/out/dev"
-                         :optimizations :whitespace
+                         :output-dir "resources/js/out"
+                         :optimizations :none
                          :output-to "resources/js/main.js"}}
              {:id "prod"
               :figwheel false
               :source-paths ["src/preterition/client"]
               :compiler {:source-map "resources/js/main.js.map"
                          :optimizations :advanced
-                         :output-dir "resources/js/out"
-                         :output-to "resources/js/main.js"} }]})
+                         :output-dir "resources/js/prod/out"
+                         :output-to "resources/js/main.js"} }
+             {:id "static"
+              :figwheel false
+              :source-paths ["src/preterition/client/render"]
+              :compiler {:source-map "resources/js/render.js.map"
+                         :optimizations :advanced
+                         :output-dir "resources/js/static/out"
+                         :output-to "resources/js/render.js"} }]})
