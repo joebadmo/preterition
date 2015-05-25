@@ -1,6 +1,10 @@
 (ns preterition.client.render
-  (:require [preterition.client.components :refer [Main]]))
+  (:require [cljs.reader :as edn]
+            [preterition.client.components :refer [Main]]))
 
 (defn ^:export render-to-string
   [state]
-  (.renderToString js/React (Main state)))
+  (->> state
+       edn/read-string
+       Main
+       (.renderToString js/React)))

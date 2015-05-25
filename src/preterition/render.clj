@@ -1,11 +1,54 @@
 (ns preterition.render
   (:require [clojure.java.io :as io]
-            [hiccup.page :refer [html5 include-css include-js]])
+            [clojure.string :refer [split join]]
+            [hiccup.page :refer [html5 include-css include-js]]
+            [hickory.render :refer [hiccup-to-html]]
+            [preterition.database :refer [select-documents get-document]])
   (:import [javax.script
             Invocable
             ScriptEngineManager]))
 
-((render-fn) "foo" "bar")
+(def nav [{:title "about" :href "/#about"}
+          {:title "code" :href "/#code"}
+          {:title "prose" :href "/#prose"}
+          {:title "blog" :href "/blog"}])
+
+(def documents (select-documents))
+
+(map :path documents)
+
+(def ^:private convert-hiccup-to-html #(-> % vector hiccup-to-html))
+
+(def index (-> documents first :path get-document (update-in [:content] convert-hiccup-to-html)))
+
+(-> (render-fn) (apply [(-> documents first :path get-state)]))
+
+(def render (render-fn))
+
+(def state {:nav-data nav
+            :loading false
+            :route {:data index
+                    :category nil
+                    :path ""
+                    :fragment nil}})
+
+(defn- activate-nav-item [category {href :href :as nav-item}]
+  (let [active (= (str "/" category) href)]
+    (assoc nav-item :active active)))
+
+(defn get-state [full-path]
+  (let [[category & path-tokens] (-> (split full-path #"/") ((partial remove empty?)))
+        path (join "/" path-tokens)]
+    {:nav-data (map (partial activate-nav-item category) nav)
+     :loading false
+     :route {:data (-> full-path get-document (update-in [:content] convert-hiccup-to-html))
+             :category category
+             :path path
+             :fragment nil}}))
+
+(-> (render-fn)
+    (apply [state]))
+
 
 (defn- render-fn []
   (let [js (doto (.getEngineByName (ScriptEngineManager.) "nashorn")
@@ -23,26 +66,19 @@
                                 pr-str
                                 list
                                 object-array)))]
-    (fn render [title bar]
+    (fn render [state]
       (html5
        [:head
         [:meta {:charset "utf-8"}]
         [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge,chrome=1"}]
         [:meta {:name "viewport" :content "width=device-width"}]
-        [:title (str title " | Omelette")]]
+        [:title (state :title)]
+        [:link {:href "http://fonts.googleapis.com/css?family=Roboto|Inconsolata"
+                :rel "stylesheet"
+                :type "text/css"}]
+        (include-css "/css/style.css")
+        [:link {:rel "shortcut icon" :href "/images/joe.xoxomoon.png"}]]
        [:body
-        ; (include-css "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.css")
-        ; (include-css "//fonts.googleapis.com/css?family=Open+Sans:300")
-        ; (include-css "/assets/stylesheets/style.css")
-        ; (include-js "/assets/scripts/main.js")
         ; Render view to HTML string and insert it where React will mount.
-        [:div#omelette-app (render-to-string {:title "static"
-                                              :nav-data []
-                                              :loading true
-                                              :route {:category nil
-                                                      :path nil
-                                                      :data {:content "foo"}}})]
-        ; Serialize app state so client can initialize without making an additional request.
-        ; Initialize client and pass in IDs of the app HTML and app EDN elements.
-        ]))))
-        ; [:script {:type "text/javascript"} "omelette.view.init('omelette-app', 'omelette-state')"]])))
+        [:div#main (render-to-string state)]
+        (include-js "/js/main.js")]))))

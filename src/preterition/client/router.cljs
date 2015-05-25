@@ -63,7 +63,6 @@
           (put! router {:fragment fragment :type :scroll})
           (. history (replaceState (clj->js newState) nil (str path fragment))))))
 
-
     (put! router {:category category
                   :path path
                   :fragment fragment})))
