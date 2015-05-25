@@ -1,6 +1,6 @@
 (ns preterition.config)
 
-(def env :dev)
+(def env :prod)
 
 (def downloads-dir "images")
 

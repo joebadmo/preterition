@@ -10,5 +10,6 @@ pom.xml.asc
 /repos
 todo.md
 resources/js/
+resources/static/
 .cljs_rhino_repl
 figwheel_server.log

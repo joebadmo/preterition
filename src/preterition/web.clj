@@ -48,6 +48,10 @@
     (context "/document" [] get-document)
     (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)}))
   (resources "/" {:root ""})
+  (GET "/" [] (-> (file-response "index.html" {:root "resources/static"}) (content-type "text/html")))
+  (GET "/*" {uri :uri}
+       (-> uri rest join (str ".html") (file-response {:root "resources/static"}) (content-type "text/html")))
+  ; (GET "/*" [] (-> (file-response "index.html" {:root "static"}) (content-type "text/html")))
   (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
   (ANY "/*" [] fourohfour))
 
