@@ -13,7 +13,7 @@
             [preterition.documents :as documents]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
-            [ring.util.response :refer [response file-response content-type]])
+            [ring.util.response :refer [response file-response content-type charset]])
   (import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (def fourohfour (not-found "Not found"))
@@ -30,14 +30,14 @@
   (let [out (ByteArrayOutputStream.)
         writer (transit/writer out :json)
         _ (transit/write writer data)
-        serialized  (.toString out)]
+        serialized (.toString out)]
     (.reset out)
     serialized))
 
 (def get-document
   (GET "/*" {uri :uri}
        (if-let [doc (-> (get-path uri) documents/get-document)]
-         {:body (write doc)}
+         (charset {:body (write doc)} "UTF-8")
          fourohfour)))
 
 (defroutes api-routes

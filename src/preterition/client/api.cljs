@@ -19,7 +19,7 @@
     (http/get url {:with-credentials? false
                    :channel (chan 1 (map #(-> % :body deserialize)))})))
 
-(def ^:private convert-hiccup-to-html #(-> % vector hiccup-to-html))
+(defn- convert-hiccup-to-html [hiccup] (-> hiccup vector hiccup-to-html))
 
 (defn request-doc [path]
   (go
