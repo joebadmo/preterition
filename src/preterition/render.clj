@@ -3,7 +3,7 @@
             [clojure.string :refer [split join]]
             [hiccup.page :refer [html5 include-css include-js]]
             [hickory.render :refer [hiccup-to-html]]
-            [preterition.database :refer [select-documents]]
+            [preterition.database :refer [select-documents get-documents-by-category]]
             [preterition.documents :refer [get-document]])
   (:import [javax.script
             Invocable
@@ -46,25 +46,23 @@
                                  pr-str
                                  list
                                  object-array)))]
-    (fn render [document]
-      (let [state (-> document :path get-state)
-            title (:title document)]
-        (html5
-          [:head
-           [:meta {:charset "utf-8"}]
-           [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge,chrome=1"}]
-           [:meta {:name "viewport" :content "width=device-width"}]
-           [:title title]
-           [:link {:href "http://fonts.googleapis.com/css?family=Roboto|Inconsolata"
-                   :rel "stylesheet"
-                   :type "text/css"}]
-           (include-css "/css/style.css")
-           [:link {:rel "shortcut icon" :href "/images/joe.xoxomoon.png"}]]
-          [:body
-           ; Render view to HTML string and insert it where React will mount.
-           [:div#main (render-to-string state)]
-           [:script#state {:type "application/edn"} state]
-           (include-js "/js/main.js")])))))
+    (fn render [{:keys [state title]}]
+      (html5
+        [:head
+         [:meta {:charset "utf-8"}]
+         [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge,chrome=1"}]
+         [:meta {:name "viewport" :content "width=device-width"}]
+         [:title title]
+         [:link {:href "http://fonts.googleapis.com/css?family=Roboto|Inconsolata"
+                 :rel "stylesheet"
+                 :type "text/css"}]
+         (include-css "/css/style.css")
+         [:link {:rel "shortcut icon" :href "/images/joe.xoxomoon.png"}]]
+        [:body
+         ; Render view to HTML string and insert it where React will mount.
+         [:div#main (render-to-string state)]
+         [:script#state {:type "application/edn"} state]
+         (include-js "/js/main.js")]))))
 
 (defn mkdirs [filepath]
   (loop [dirs (-> filepath (split #"/") drop-last)
@@ -74,16 +72,31 @@
         (.mkdir (java.io.File. next-dir))
         (recur (rest dirs) next-dir)))))
 
-(defn write [document render]
-  (let [content (render document)
-        path (document :path)
+(defn write [state path render]
+  (let [content (render state)
         filename (str "resources/public/" path ".html")]
     (mkdirs filename)
     (spit filename content)))
 
 (defn render-all []
   (let [render (render-fn)]
-    (doseq [d (select-documents)]
-      (write d render))))
 
-(render-all)
+    ; render documents
+    (doseq [d (select-documents)]
+      (write {:state (-> d :path get-state)
+              :title (d :title)
+              :path (d :path)}
+             render))
+
+    ; render blog listing page
+    (write {:state {:nav-data (map (partial activate-nav-item "blog") nav)
+                    :loading false
+                    :route {:data (get-documents-by-category "blog")
+                            :category "blog"
+                            :path nil
+                            :fragment nil}}
+            :title "blog"
+            :path "blog"}
+           render)))
+
+; (render-all)
