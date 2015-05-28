@@ -3,6 +3,7 @@
             [clojure.string :refer [split join]]
             [hiccup.page :refer [html5 include-css include-js]]
             [hickory.render :refer [hiccup-to-html]]
+            [preterition.database :refer [select-documents]]
             [preterition.documents :refer [get-document]])
   (:import [javax.script
             Invocable
@@ -12,30 +13,6 @@
           {:title "code" :href "/#code"}
           {:title "prose" :href "/#prose"}
           {:title "blog" :href "/blog"}])
-
-(def documents (select-documents))
-
-(def render (render-fn))
-
-(def index (first documents))
-
-(doseq [d documents]
-  (write d))
-
-(defn mkdirs [filepath]
-  (loop [dirs (-> filepath (split #"/") drop-last)
-         current "."]
-    (when (not-empty dirs)
-      (let [next-dir (str current "/" (first dirs))]
-        (.mkdir (java.io.File. next-dir))
-        (recur (rest dirs) next-dir)))))
-
-(defn write [document]
-  (let [content (render document)
-        path (document :path)
-        filename (str "resources/static/" path ".html")]
-    (mkdirs filename)
-    (spit filename content)))
 
 (def ^:private convert-hiccup-to-html #(-> % vector hiccup-to-html))
 
@@ -86,4 +63,27 @@
           [:body
            ; Render view to HTML string and insert it where React will mount.
            [:div#main (render-to-string state)]
+           [:script#state {:type "application/edn"} state]
            (include-js "/js/main.js")])))))
+
+(defn mkdirs [filepath]
+  (loop [dirs (-> filepath (split #"/") drop-last)
+         current "."]
+    (when (not-empty dirs)
+      (let [next-dir (str current "/" (first dirs))]
+        (.mkdir (java.io.File. next-dir))
+        (recur (rest dirs) next-dir)))))
+
+(defn write [document render]
+  (let [content (render document)
+        path (document :path)
+        filename (str "resources/public/" path ".html")]
+    (mkdirs filename)
+    (spit filename content)))
+
+(defn render-all []
+  (let [render (render-fn)]
+    (doseq [d (select-documents)]
+      (write d render))))
+
+(render-all)

@@ -19,7 +19,7 @@
 (def fourohfour (not-found "Not found"))
 
 (defn get-assets []
-  (assets/load-assets "images" [#"/.+\.jpg|png$"]))
+  (assets/load-assets "public/images" [#"/.+\.jpg|png$"]))
 
 (defn get-path [uri]
   (->> (split uri #"\/")
@@ -47,12 +47,16 @@
     (GET "/documents" [] {:body (db/get-documents)})
     (context "/document" [] get-document)
     (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)}))
-  (resources "/" {:root ""})
-  (GET "/" [] (-> (file-response "index.html" {:root "resources/static"}) (content-type "text/html")))
+  (resources "/" {:root "public"})
+
+  ;prod
+  (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
   (GET "/*" {uri :uri}
-       (-> uri rest join (str ".html") (file-response {:root "resources/static"}) (content-type "text/html")))
-  ; (GET "/*" [] (-> (file-response "index.html" {:root "static"}) (content-type "text/html")))
-  (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
+       (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
+
+  ; dev
+  ; (GET "/*" [] (-> (file-response "index.html" {:root ""}) (content-type "text/html")))
+
   (ANY "/*" [] fourohfour))
 
 (def cors-headers

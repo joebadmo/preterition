@@ -9,7 +9,8 @@ pom.xml.asc
 /.nrepl-port
 /repos
 todo.md
+resources/public/**/*.html
+resources/public/js/
 resources/js/
-resources/static/
 .cljs_rhino_repl
 figwheel_server.log

@@ -40,7 +40,7 @@
             [lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3"]]
 
-  :clean-targets ^{:protect false} [:target-path "resources/js"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/js" "resources/js"]
 
   :figwheel {:ring-handler preterition.web/app}
 
@@ -53,17 +53,16 @@
               :source-paths ["src/preterition/client"]
               :figwheel { :on-jsload "preterition.client.core/on-jsload" }
               :compiler {:main preterition.client.core
-                         :asset-path "/js/out"
-                         :output-dir "resources/js/out"
+                         :output-dir "resources/public/js/out"
                          :optimizations :none
-                         :output-to "resources/js/main.js"}}
+                         :output-to "resources/public/js/main.js"}}
              {:id "prod"
               :figwheel false
               :source-paths ["src/preterition/client"]
-              :compiler {:source-map "resources/js/main.js.map"
+              :compiler {:source-map "resources/public/js/main.js.map"
                          :optimizations :advanced
-                         :output-dir "resources/js/prod/out"
-                         :output-to "resources/js/main.js"} }
+                         :output-dir "resources/public/js/prod/out"
+                         :output-to "resources/public/js/main.js"} }
              {:id "static"
               :figwheel false
               :source-paths ["src/preterition/client/render"]

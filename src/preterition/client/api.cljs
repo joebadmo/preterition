@@ -1,9 +1,11 @@
 (ns preterition.client.api
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [<! chan take!]]
+            [cljs.reader :refer [read-string]]
             [cljs-http.client :as http]
             [clojure.string :refer [join]]
             [cognitect.transit :refer [read reader]]
+            [goog.dom]
             [hickory.render :refer [hiccup-to-html]]))
 
 (def ^:private host "http://localhost:3449/")
@@ -24,7 +26,15 @@
     (-> (<! (request (str "document/" (if (not-empty path) path "index"))))
         (update-in [:content] convert-hiccup-to-html))))
 
+(def initialState (-> "state" goog.dom/getElement .-textContent read-string))
+
 (def ^:private memo (atom {}))
+(enable-console-print!)
+
+(let [{:keys [category path]} (initialState :route)
+      k (->> [category path] (filter not-empty) (join "/"))
+      res (-> initialState :route :data)]
+  (swap! memo assoc k res))
 
 (defn cached? [{:keys [category path]}]
   (->> [category path]

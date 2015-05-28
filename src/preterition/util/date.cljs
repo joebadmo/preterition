@@ -1,4 +1,4 @@
 (ns preterition.util.date)
 
 (defn format-date [date]
-  (.toLocaleDateString (js/Date. date)))
+  (.toString (js/Date. date)))
