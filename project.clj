@@ -21,6 +21,7 @@
                  [me.raynes/cegdown "0.1.1"]
                  [me.raynes/fs "1.4.6"]
                  [optimus "0.17.1"]
+                 [optimus-img-transform "0.2.0"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-3211"]
                  [org.postgresql/postgresql "9.3-1102-jdbc41"]
@@ -40,7 +41,7 @@
             [lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3"]]
 
-  :clean-targets ^{:protect false} [:target-path "resources/public/js" "resources/js"]
+  :clean-targets ^{:protect false} [:target-path "resources/public" "resources/js"]
 
   :figwheel {:ring-handler preterition.web/app}
 
@@ -59,10 +60,10 @@
              {:id "prod"
               :figwheel false
               :source-paths ["src/preterition/client"]
-              :compiler {:source-map "resources/public/js/main.js.map"
+              :compiler {:source-map "resources/js/main.js.map"
                          :optimizations :advanced
-                         :output-dir "resources/public/js/prod/out"
-                         :output-to "resources/public/js/main.js"} }
+                         :output-dir "resources/js/prod/out"
+                         :output-to "resources/js/main.js"} }
              {:id "static"
               :figwheel false
               :source-paths ["src/preterition/client/render"]

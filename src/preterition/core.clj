@@ -1,7 +1,12 @@
 (ns preterition.core
   (:require [clojure.string :refer [join split]]
             [me.raynes.fs :refer [file walk]]
+            [optimus.export :as export]
+            [optimus.assets :as assets]
+            [optimus.optimizations :as optimizations]
+            [preterition.assets :refer [export-assets]]
             [preterition.config :refer [configs path-prefix]]
+            [preterition.render :refer [render-all]]
             [preterition.repo :refer :all]
             [preterition.parse :refer [parse strip-ext]]
             [preterition.database :as db]))
@@ -64,3 +69,20 @@
         (db/update document-set)
         document-set)
       "nothing new")))
+
+(defn get-assets []
+  (concat
+    (assets/load-bundle "./" "main.js" ["/js/main.js"])
+    (assets/load-assets "images" [#"/img/.+\.jpg|png$"])
+    (assets/load-bundle "./" "style.css" ["/css/style.css"])))
+
+(defn export-assets []
+  (-> (get-assets)
+      (optimizations/minify-js-assets nil)
+      (optimizations/minify-css-assets {:clean-css {:keep-special-comments 0}})
+      (optimizations/inline-css-imports)
+      (optimizations/concatenate-bundles)
+      (export/save-assets "./resources/public/")))
+
+(export-assets)
+(render-all)

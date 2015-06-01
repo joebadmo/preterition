@@ -1,9 +1,11 @@
 (ns preterition.render
   (:require [clojure.java.io :as io]
             [clojure.string :refer [split join]]
+            [digest :refer [md5]]
             [hiccup.page :refer [html5 include-css include-js]]
             [hickory.render :refer [hiccup-to-html]]
-            [preterition.database :refer [select-documents get-documents-by-category]]
+            [optimus.link :as link]
+            [preterition.database :refer [select-newest-commit select-documents get-documents-by-category]]
             [preterition.documents :refer [get-document]])
   (:import [javax.script
             Invocable
@@ -30,6 +32,9 @@
              :path path
              :fragment nil}}))
 
+(defn cache-buster [path]
+  (->> (str "./resources/public" path) slurp md5 (str path "?")))
+
 (defn- render-fn []
   (let [js (doto (.getEngineByName (ScriptEngineManager.) "nashorn")
              (.eval "var global = this;")
@@ -46,7 +51,7 @@
                                  pr-str
                                  list
                                  object-array)))]
-    (fn render [{:keys [state title]}]
+    (fn render [state title]
       (html5
         [:head
          [:meta {:charset "utf-8"}]
@@ -56,13 +61,13 @@
          [:link {:href "http://fonts.googleapis.com/css?family=Roboto|Inconsolata"
                  :rel "stylesheet"
                  :type "text/css"}]
-         (include-css "/css/style.css")
-         [:link {:rel "shortcut icon" :href "/images/joe.xoxomoon.png"}]]
+         (include-css (cache-buster "/css/style.css"))
+         [:link {:rel "shortcut icon" :href (cache-buster "/img/joe.xoxomoon.png")}]]
         [:body
          ; Render view to HTML string and insert it where React will mount.
          [:div#main (render-to-string state)]
          [:script#state {:type "application/edn"} state]
-         (include-js "/js/main.js")]))))
+         (include-js (cache-buster "/js/main.js"))]))))
 
 (defn mkdirs [filepath]
   (loop [dirs (-> filepath (split #"/") drop-last)
@@ -72,9 +77,8 @@
         (.mkdir (java.io.File. next-dir))
         (recur (rest dirs) next-dir)))))
 
-(defn write [state path render]
-  (let [content (render state)
-        filename (str "resources/public/" path ".html")]
+(defn write [path content]
+  (let [filename (str "resources/public/" path ".html")]
     (mkdirs filename)
     (spit filename content)))
 
@@ -83,20 +87,16 @@
 
     ; render documents
     (doseq [d (select-documents)]
-      (write {:state (-> d :path get-state)
-              :title (d :title)
-              :path (d :path)}
-             render))
+      (let [{:keys [path title]} d
+            content (-> path get-state (render title))]
+        (write path content)))
 
     ; render blog listing page
-    (write {:state {:nav-data (map (partial activate-nav-item "blog") nav)
-                    :loading false
-                    :route {:data (get-documents-by-category "blog")
-                            :category "blog"
-                            :path nil
-                            :fragment nil}}
-            :title "blog"
-            :path "blog"}
-           render)))
-
-; (render-all)
+    (write "blog" (render
+             {:nav-data (map (partial activate-nav-item "blog") nav)
+              :loading false
+              :route {:data (get-documents-by-category "blog")
+                      :category "blog"
+                      :path nil
+                      :fragment nil}}
+             "blog"))))

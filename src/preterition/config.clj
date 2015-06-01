@@ -1,8 +1,9 @@
 (ns preterition.config)
 
-(def env :prod)
+(def env :dev)
+; (def env :prod)
 
-(def downloads-dir "images")
+(def downloads-dir "images/img")
 
 (def path-prefix "./repos/")
 

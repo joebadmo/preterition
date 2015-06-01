@@ -3,10 +3,6 @@
             [compojure.core :refer [context defroutes GET POST ANY]]
             [compojure.route :refer [not-found resources]]
             [clojure.string :refer [split join]]
-            [optimus.prime :as optimus]
-            [optimus.assets :as assets]
-            [optimus.optimizations :as optimizations]
-            [optimus.strategies :as strategies]
             [preterition.config :refer [env]]
             [preterition.core :refer [on-post]]
             [preterition.database :as db]
@@ -17,9 +13,6 @@
   (import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (def fourohfour (not-found "Not found"))
-
-(defn get-assets []
-  (assets/load-assets "public/images" [#"/.+\.jpg|png$"]))
 
 (defn get-path [uri]
   (->> (split uri #"\/")
@@ -47,9 +40,9 @@
     (GET "/documents" [] {:body (db/get-documents)})
     (context "/document" [] get-document)
     (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)}))
-  (resources "/" {:root "public"})
 
   ;prod
+  (resources "/" {:root "public"})
   (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
   (GET "/*" {uri :uri}
        (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
@@ -73,13 +66,5 @@
         merge cors-headers))))
 
 (def app (-> api-routes
-             (optimus/wrap
-               get-assets
-               (if (= env :dev)
-                 optimizations/none
-                 optimizations/all)
-               (if (= env :dev)
-                 strategies/serve-live-assets
-                 strategies/serve-frozen-assets))
              wrap-content-type
              wrap-cors))

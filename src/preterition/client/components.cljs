@@ -9,7 +9,7 @@
   (dom/li
     nil
     (dom/img
-      {:src "/images/joe.xoxomoon.png"
+      {:src "/img/joe.xoxomoon.png"
        :className (if loading "loading")})
     (dom/a
       {:className "home" :href "/"}
