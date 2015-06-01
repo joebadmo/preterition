@@ -3,8 +3,6 @@
 (def env :dev)
 ; (def env :prod)
 
-(def downloads-dir "images/img")
-
 (def path-prefix "./repos/")
 
 (def ^:private raw-configs [{:username "joebadmo"

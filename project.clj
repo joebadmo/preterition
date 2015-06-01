@@ -16,6 +16,7 @@
                  [com.taoensso/nippy "2.9.0-RC2"]
                  [compojure "1.3.4"]
                  [digest "1.4.4"]
+                 [fivetonine/collage "0.2.0"]
                  [hiccup "1.0.5"]
                  [hickory "0.5.4"]
                  [me.raynes/cegdown "0.1.1"]

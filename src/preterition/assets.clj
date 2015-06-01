@@ -6,7 +6,7 @@
 (defn get-assets []
   (concat
     (assets/load-bundle "./" "main.js" ["/js/main.js"])
-    (assets/load-assets "images" [#"/img/.+\.jpg|png$"])
+    (assets/load-assets "./" ["/img/joe.xoxomoon.png"])
     (assets/load-bundle "./" "style.css" ["/css/style.css"])))
 
 (defn export-assets []

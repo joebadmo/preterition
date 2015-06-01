@@ -1,16 +1,19 @@
 (ns preterition.images
-  (:require [clojure.java.io :refer [file input-stream output-stream copy]]
+  (:require [clojure.java.io :refer [file input-stream output-stream copy as-url]]
             [clojure.string :refer [split lower-case]]
             [digest :refer [md5]]
-            [preterition.config :refer [downloads-dir]]))
+            [fivetonine.collage.util :as util]
+            [fivetonine.collage.core :refer :all]))
 
 (defn make-local-copy [uri]
   (let [ext (-> uri (split #"\.") last lower-case)
         hash-name (md5 uri)
-        path (str downloads-dir "/" hash-name "." ext)
-        file-name (str "resources/" path)]
+        path (str "/img/" hash-name "." ext)
+        file-name (str "resources/public" path)]
     (if-not (-> file-name file .exists)
-      (with-open [in (input-stream uri)
-                  out (output-stream file-name)]
-        (copy in out)))
+      (-> uri
+          as-url
+          util/load-image
+          (resize :width 800)
+          (util/save file-name :quality 0.8)))
     path))
