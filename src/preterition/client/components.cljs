@@ -1,7 +1,7 @@
 (ns preterition.client.components
   (:require [clojure.string :refer [blank?]]
             [preterition.client.scroll :refer [scroll-watch scroll-unwatch]]
-            [preterition.util.date :refer [format-date]]
+            [preterition.client.util.date :refer [format-date]]
             [quiescent.core :as q]
             [quiescent.dom :as dom]))
 

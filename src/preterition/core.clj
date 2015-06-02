@@ -1,12 +1,13 @@
 (ns preterition.core
-  (:require [clojure.string :refer [join split]]
+  (:require [clojure.java.io :as io]
+            [clojure.string :refer [join split]]
             [me.raynes.fs :refer [file walk]]
             [optimus.export :as export]
             [optimus.assets :as assets]
             [optimus.optimizations :as optimizations]
             [preterition.assets :refer [export-assets]]
             [preterition.config :refer [configs path-prefix]]
-            [preterition.render :refer [render-all]]
+            [preterition.render :refer [render-fn]]
             [preterition.repo :refer :all]
             [preterition.parse :refer [parse strip-ext]]
             [preterition.database :as db]))
@@ -62,11 +63,32 @@
       (->> (get-all-documents conf)
            (assoc {:git-commit head-commit-map} :add)))))
 
+(defn write [path content]
+  (let [filename (str "resources/public/" path ".html")]
+    (io/make-parents filename)
+    (spit filename content)))
+
+(defn render-all []
+  (let [render (render-fn)]
+
+    ; render documents
+    (doseq [d (db/select-documents)]
+      (let [{:keys [path title]} d
+            content (render path title)]
+        (write path content)))
+
+    ; render listing pages
+    (doseq [d (db/get-categories)]
+      (let [content (render d d)]
+        (write d content)))))
+
 (defn on-post [repo]
   (if-let [config (configs repo)]
     (if-let [document-set (get-document-set config)]
       (do
         (db/update document-set)
+        (export-assets)
+        (render-all)
         document-set)
       "nothing new")))
 

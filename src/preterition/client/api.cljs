@@ -6,7 +6,8 @@
             [clojure.string :refer [join]]
             [cognitect.transit :refer [read reader]]
             [goog.dom]
-            [hickory.render :refer [hiccup-to-html]]))
+            [hickory.render :refer [hiccup-to-html]]
+            [preterition.util :refer [convert-hiccup-to-html]]))
 
 (def ^:private host "http://localhost:3449/")
 
@@ -18,8 +19,6 @@
   (let [url (str host "api/" path)]
     (http/get url {:with-credentials? false
                    :channel (chan 1 (map #(-> % :body deserialize)))})))
-
-(defn- convert-hiccup-to-html [hiccup] (-> hiccup vector hiccup-to-html))
 
 (defn request-doc [path]
   (go

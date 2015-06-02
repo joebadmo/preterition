@@ -41,6 +41,9 @@
 (defquery delete-documents! "preterition/sql/delete.sql"
   {:connection db-spec})
 
+(defquery select-distinct-categories "preterition/sql/get-categories.sql"
+  {:connection db-spec})
+
 (def ^:private defaults
   {:published true
    :author "Joe Moon"
@@ -69,6 +72,12 @@
   (-> sql
       (update-in [:aliases] array-to-vec)
       sq/to-clj))
+
+(defn get-categories []
+  (-> (select-distinct-categories
+        {}
+        {:row-fn :category})
+      ((partial remove #(= % "index.md")))))
 
 (defn get-documents []
   (select-documents

@@ -1,5 +1,5 @@
 (ns preterition.images
-  (:require [clojure.java.io :refer [file input-stream output-stream copy as-url]]
+  (:require [clojure.java.io :refer [file input-stream output-stream copy as-url make-parents]]
             [clojure.string :refer [split lower-case]]
             [digest :refer [md5]]
             [fivetonine.collage.util :as util]
@@ -9,11 +9,12 @@
   (let [ext (-> uri (split #"\.") last lower-case)
         hash-name (md5 uri)
         path (str "/img/" hash-name "." ext)
-        file-name (str "resources/public" path)]
-    (if-not (-> file-name file .exists)
+        filename (str "resources/public" path)]
+    (make-parents filename)
+    (if-not (-> filename file .exists)
       (-> uri
           as-url
           util/load-image
           (resize :width 800)
-          (util/save file-name :quality 0.8)))
+          (util/save filename :quality 0.8)))
     path))
