@@ -3,7 +3,8 @@
   (:require [cljs.core.async :refer [put! chan <!]]
             [clojure.string :refer [split join]]
             [goog.events :as events]
-            [preterition.client.scroll :refer [start-scroll scroll-events]])
+            [preterition.client.scroll :refer [start-scroll scroll-events]]
+            [preterition.util :refer [parse-url-path]])
   (:import [goog.history Html5History EventType]))
 
 (defonce html5History (Html5History.))
@@ -23,8 +24,7 @@
     (when (and (= tag-name "A") (= host target-host))
       (.preventDefault e)
       (let [full-path (.-pathname target)
-            [category & path-tokens] (-> (split full-path #"/") ((partial remove empty?)))
-            path (join "/" path-tokens)
+            {:keys [category path]} (parse-url-path full-path)
             fragment (.-hash target)
             route {:category (if category category "")
                    :path path

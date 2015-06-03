@@ -25,15 +25,16 @@
     (-> (<! (request (str "document/" (if (not-empty path) path "index"))))
         (update-in [:content] convert-hiccup-to-html))))
 
-(def initialState (-> "state" goog.dom/getElement .-textContent read-string))
+(def initialState (if-let [e (goog.dom/getElement "state")]
+                    (-> e.-textContent read-string)))
 
 (def ^:private memo (atom {}))
-(enable-console-print!)
 
-(let [{:keys [category path]} (initialState :route)
-      k (->> [category path] (filter not-empty) (join "/"))
-      res (-> initialState :route :data)]
-  (swap! memo assoc k res))
+(if initialState
+  (let [{:keys [category path]} (initialState :route)
+        k (->> [category path] (filter not-empty) (join "/"))
+        res (-> initialState :route :data)]
+    (swap! memo assoc k res)))
 
 (defn cached? [{:keys [category path]}]
   (->> [category path]

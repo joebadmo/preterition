@@ -57,7 +57,8 @@
               :compiler {:main preterition.client.core
                          :output-dir "resources/public/js/out"
                          :optimizations :none
-                         :output-to "resources/public/js/main.js"}}
+                         :output-to "resources/public/js/main.js"
+                         :asset-path "js/out"}}
              {:id "prod"
               :figwheel false
               :source-paths ["src/preterition/client"]

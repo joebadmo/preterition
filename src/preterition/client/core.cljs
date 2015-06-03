@@ -3,21 +3,22 @@
   (:require [cljs.core.async :refer [<! chan take!]]
             [cljs.reader :refer [read-string]]
             [goog.dom]
-            [preterition.client.api :refer [get-route-data cached?]]
+            [preterition.client.api :refer [initialState get-route-data cached?]]
             [preterition.client.components :refer [Main]]
             [preterition.client.router :refer [start stop router set-title!]]
             [preterition.client.scroll :refer [scroll-to-fragment]]
+            [preterition.util :refer [parse-url-path get-nav]]
             [quiescent.core :as q]
             [quiescent.dom :as d]))
 
-(enable-console-print!)
+; (enable-console-print!)
 
 (def nav [{:title "about" :href "/#about"}
           {:title "code" :href "/#code"}
           {:title "prose" :href "/#prose"}
           {:title "blog" :href "/blog"}])
 
-(defonce application-state (-> "state" goog.dom/getElement .-textContent read-string atom))
+(defonce application-state (atom initialState))
 
 (defn- activate-nav-item [category fragment {href :href :as nav-item}]
   (let [active (and
@@ -69,7 +70,21 @@
     (stop)
     (start)))
 
-(defonce go (init application-state))
+(defonce go (if-let [s @application-state]
+              (init application-state)
+              (let [loc (.-location js/document)
+                    pathname (.-pathname loc)
+                    fragment (.-hash loc)
+                    {:keys [category path]} (parse-url-path pathname)]
+                (take! (get-route-data {:category category :path path})
+                       (fn [data]
+                         (swap! application-state assoc
+                                :loading false
+                                :nav-data (get-nav category fragment)
+                                :route {:data data
+                                        :category category
+                                        :path path})
+                         (init application-state))))))
 
 (defn on-jsload []
   (init application-state))
