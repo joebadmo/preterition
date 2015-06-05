@@ -29,8 +29,7 @@
 
 (defn scroll-watch [fragments]
   (if-not (contains? @watched-fragment-sets fragments)
-    (let [h (.-history js/window)
-          boundaries (get-boundaries-map fragments)
+    (let [boundaries (get-boundaries-map fragments)
           previous (atom nil)]
       (go
         (while true
@@ -40,7 +39,7 @@
                     filtered (filterv #(>= (.ceil js/Math p) (:pos %)) boundaries)
                     m (apply max-key :pos filtered)
                     current (if m (m :name) "")]
-                (when (not= @previous current)
+                (when (and (not= @previous current) (> p 0))
                   (>! scroll-events current)
                   (reset! previous current)))))))))
   (swap! watched-fragment-sets assoc fragments true))

@@ -35,22 +35,16 @@
         (let [{:keys [category path fragment type] :as route} (<! router)]
           (swap! state-atom assoc
                  :event-type type
-                 :nav-data (map (partial activate-nav-item category fragment) nav))
-          (if (cached? route)
-            (swap! state-atom assoc
-                   :loading false
-                   :route {:data (<! (get-route-data {:category category :path path}))
-                           :category category
-                           :path path
-                           :fragment fragment})
-            (do
-              (swap! state-atom assoc :loading true)
-              (swap! state-atom assoc
-                     :loading false
-                     :route {:data (<! (get-route-data {:category category :path path}))
-                             :category category
-                             :path path
-                             :fragment fragment}))))))
+                 :nav-data (map (partial activate-nav-item category fragment) nav)
+                 :route nil)
+          (if-not (cached? route)
+            (swap! state-atom assoc :loading true))
+          (swap! state-atom assoc
+                 :loading false
+                 :route {:data (<! (get-route-data {:category category :path path}))
+                         :category category
+                         :path path
+                         :fragment fragment}))))
 
     ; render initially so client can take over
     ; and scroll hooks on index can start
@@ -62,9 +56,9 @@
 
     (add-watch state-atom :watcher
       (fn [key atom old-state new-state]
+        (q/render (Main new-state) root)
         (when-let [route (new-state :route)]
           (set-title! route)
-          (q/render (Main new-state) root)
           (if (= (new-state :event-type) :click)
             (scroll-to-fragment (route :fragment))))))
     (stop)
@@ -87,4 +81,4 @@
                          (init application-state))))))
 
 (defn on-jsload []
-  (init application-state))
+  (prn "load"))

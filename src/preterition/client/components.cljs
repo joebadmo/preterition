@@ -101,14 +101,15 @@
   (dom/div
     {:className "container"}
     (Navbar {:data nav-data :loading loading})
-    (dom/main
-      nil
-      (let [{:keys [category path data]} route]
-        (cond
-          (every? blank? [category path])
-          (Index (-> route :data :content))
-          (blank? path)
-          (Listing {:title category
-                    :children (-> data ((partial map PostItem)))})
-          :else (Post data)))
-      (Footer))))
+    (if route
+      (dom/main
+        nil
+        (let [{:keys [category path data]} route]
+          (cond
+            (every? blank? [category path])
+            (Index (-> route :data :content))
+            (blank? path)
+            (Listing {:title category
+                      :children (-> data ((partial map PostItem)))})
+            :else (Post data)))
+        (Footer)))))

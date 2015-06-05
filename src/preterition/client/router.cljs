@@ -33,6 +33,7 @@
         (put! router route)
         (. history (pushState (clj->js route) nil (str full-path fragment)))))))
 
+
 (defn handle-pop [e]
   (let [route (js->clj (.-state e) :keywordize-keys true)]
     (put! router (assoc route :type :pop))))
@@ -53,10 +54,10 @@
     (while true
       (let [fragment (<! scroll-events)
             path (.-pathname (.-location js/window))
-            oldState (js->clj (.-state history) :keywordize-keys true)
-            newState (assoc oldState :fragment fragment)]
+            old-state (js->clj (.-state history) :keywordize-keys true)
+            new-state (assoc old-state :fragment fragment)]
         (put! router {:fragment fragment :type :scroll})
-        (. history (replaceState (clj->js newState) nil (str path fragment)))))))
+        (. history (replaceState (clj->js new-state) nil (str path fragment)))))))
 
 
 (defn stop []
