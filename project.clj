@@ -50,6 +50,8 @@
 
   :profiles {:uberjar {:aot :all}}
 
+  :repl-options {:timeout 120000}
+
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src/preterition/client"]
