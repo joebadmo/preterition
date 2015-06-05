@@ -1,7 +1,7 @@
 (ns preterition.config)
 
-(def env :dev)
-; (def env :prod)
+; (def env :dev)
+(def env :prod)
 
 (def path-prefix "./repos/")
 

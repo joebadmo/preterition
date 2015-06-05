@@ -39,18 +39,18 @@
           (on-post (str username "/" repo)))
     (GET "/documents" [] {:body (db/get-documents)})
     (context "/document" [] get-document)
-    (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)}))
+    (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)})))
 
-  ;prod
-  ; (resources "/" {:root "public"})
-  ; (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
-  ; (GET "/*" {uri :uri}
-  ;      (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
+(defroutes prod-resources
+  (resources "/" {:root "public"})
+  (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
+  (GET "/*" {uri :uri}
+       (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html"))))
 
-  ; dev
-  (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
+(defroutes dev-resources
+  (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html"))))
 
-  (ANY "/*" [] fourohfour))
+(defroutes defaults (ANY "/*" [] fourohfour))
 
 (def cors-headers
   {"Access-Control-Allow-Origin" "*"
@@ -66,5 +66,7 @@
         merge cors-headers))))
 
 (def app (-> api-routes
+             (if (= env :prod) prod-resources dev-resources)
+             defaults
              wrap-content-type
              wrap-cors))
