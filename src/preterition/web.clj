@@ -1,6 +1,6 @@
 (ns preterition.web
   (:require [cognitect.transit :as transit]
-            [compojure.core :refer [context defroutes GET POST ANY]]
+            [compojure.core :refer [context defroutes GET POST ANY routes]]
             [compojure.route :refer [not-found resources]]
             [clojure.string :refer [split join]]
             [preterition.config :refer [env]]
@@ -27,30 +27,30 @@
     (.reset out)
     serialized))
 
-(def get-document
-  (GET "/*" {uri :uri}
-       (if-let [doc (-> (get-path uri) documents/get-document)]
-         (charset {:body (write doc)} "UTF-8")
-         fourohfour)))
+(defn get-document [uri]
+  (if-let [doc (-> (get-path uri) documents/get-document)]
+    (charset {:body (write doc)} "UTF-8")))
 
 (defroutes api-routes
   (context "/api" []
     (POST "/repo/:username/:repo" [username repo]
           (on-post (str username "/" repo)))
     (GET "/documents" [] {:body (db/get-documents)})
-    (context "/document" [] get-document)
+    (GET "/document/*" {uri :uri} (if-let [res (get-document uri)] res fourohfour))
     (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)})))
 
-(defroutes prod-resources
-  (resources "/" {:root "public"})
-  (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
-  (GET "/*" {uri :uri}
-       (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html"))))
+(def resource-routes
+  (if (= env :prod)
+    (routes
+      (resources "/" {:root "public"})
+      (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
+      (GET "/*" {uri :uri}
+           (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
+      (ANY "/*" [] fourohfour))
+    (routes
+      (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
+      (ANY "/*" [] fourohfour))))
 
-(defroutes dev-resources
-  (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html"))))
-
-(defroutes defaults (ANY "/*" [] fourohfour))
 
 (def cors-headers
   {"Access-Control-Allow-Origin" "*"
@@ -65,8 +65,8 @@
       (update-in response [:headers]
         merge cors-headers))))
 
-(def app (-> api-routes
-             (if (= env :prod) prod-resources dev-resources)
-             defaults
+(def app (-> (routes
+               api-routes
+               resource-routes)
              wrap-content-type
              wrap-cors))
