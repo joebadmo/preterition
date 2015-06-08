@@ -26,7 +26,7 @@
         (update-in [:content] convert-hiccup-to-html))))
 
 (def initialState (if-let [e (goog.dom/getElement "state")]
-                    (-> e.-textContent read-string)))
+                    (-> e .-textContent read-string)))
 
 (def ^:private memo (atom {}))
 

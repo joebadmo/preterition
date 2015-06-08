@@ -1,7 +1,6 @@
 (ns preterition.client.core
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [<! chan take!]]
-            [cljs.reader :refer [read-string]]
             [goog.dom]
             [preterition.client.api :refer [initialState get-route-data cached?]]
             [preterition.client.components :refer [Main]]
@@ -73,5 +72,6 @@
 (defn on-jsload []
   (do
     (init application-state)
+    (q/render (Main @application-state) (.getElementById js/document "main"))
     (stop)
     (start)))
