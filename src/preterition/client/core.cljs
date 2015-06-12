@@ -14,8 +14,10 @@
 
 (defonce application-state (atom initialState))
 
+(def get-root #(if js/document (.getElementById js/document "main")))
+
 (defn init [state-atom]
-  (let [root (if js/document (.getElementById js/document "main"))]
+  (let [root (get-root)]
     (go
       (while true
         (let [{:keys [category path fragment type] :as route} (<! router)]
@@ -52,7 +54,7 @@
 
     ; render initially so client can take over
     ; and scroll hooks on index can start
-    (when-let [root (if js/document (.getElementById js/document "main"))]
+    (when-let [root (get-root)]
       (let [state @application-state
             {:keys [category path]} (-> state :route)]
         (q/render (Main state) root)
@@ -72,6 +74,6 @@
 (defn on-jsload []
   (do
     (init application-state)
-    (q/render (Main @application-state) (.getElementById js/document "main"))
+    (q/render (Main @application-state) (get-root))
     (stop)
     (start)))

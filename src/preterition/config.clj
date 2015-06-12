@@ -17,5 +17,5 @@
 (defn- index-by [k config] {(config k) config})
 
 (def configs (->> (map enrich raw-configs)
-                            (map (partial index-by :repo))
-                            (reduce #(merge %1 %2) {})))
+                  (map (partial index-by :repo))
+                  (reduce #(merge %1 %2) {})))
