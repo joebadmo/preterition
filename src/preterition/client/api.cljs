@@ -9,7 +9,7 @@
             [hickory.render :refer [hiccup-to-html]]
             [preterition.util :refer [convert-hiccup-to-html]]))
 
-(def ^:private host "http://localhost:3449/")
+(def ^:private host "/")
 
 (def ^:private r (reader :json))
 

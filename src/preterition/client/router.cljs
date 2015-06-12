@@ -33,7 +33,6 @@
         (put! router route)
         (. history (pushState (clj->js route) nil (str full-path fragment)))))))
 
-
 (defn handle-pop [e]
   (let [route (js->clj (.-state e) :keywordize-keys true)]
     (put! router (assoc route :type :pop))))

@@ -1,8 +1,9 @@
 (ns preterition.client.scroll
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [put! chan <! sliding-buffer mult tap]]
+  (:require [cljs.core.async :refer [put! chan sliding-buffer mult tap close! pipe]]
             [clojure.string :refer [split]]
-            [goog.events :as events]))
+            [goog.events :as events]
+            [preterition.client.util.async :refer [debounce]]))
 
 (defn scroll-to-fragment [fragment]
   (let [fragment-string (second (split fragment "#"))]
@@ -11,6 +12,8 @@
       (.scroll js/window 0 0))))
 
 (def ^:private raw-scroll-events (chan (sliding-buffer 1)))
+(def ^:private scroll-mult (mult raw-scroll-events))
+(def ^:private raw-resize-events (chan (sliding-buffer 1)))
 
 (defn get-boundary [fragment]
   (->> (str "[name=\"" fragment "\"]")
@@ -27,25 +30,35 @@
 
 (def scroll-events (chan))
 
+(def kill-watch-events (chan))
+
+(defn get-current-fragment [boundaries]
+  (fn []
+    (let [p (.-pageYOffset js/window)
+          filtered (filterv #(>= (.ceil js/Math p) (:pos %)) boundaries)
+          m (apply max-key :pos filtered)]
+      (if m (m :name) ""))))
+
+(def deduped (chan (sliding-buffer 1) (dedupe)))
+
 (defn scroll-watch [fragments]
-  (if-not (contains? @watched-fragment-sets fragments)
-    (let [boundaries (get-boundaries-map fragments)
-          previous (atom nil)]
-      (go
-        (while true
-          (let [e (<! raw-scroll-events)]
-            (if (@watched-fragment-sets fragments)
-              (let [p (.-pageYOffset js/window)
-                    filtered (filterv #(>= (.ceil js/Math p) (:pos %)) boundaries)
-                    m (apply max-key :pos filtered)
-                    current (if m (m :name) "")]
-                (when (and (not= @previous current) (> p 0))
-                  (>! scroll-events current)
-                  (reset! previous current)))))))))
-  (swap! watched-fragment-sets assoc fragments true))
+  (let [boundaries (get-boundaries-map fragments)
+        filtered (chan (sliding-buffer 1) (map (get-current-fragment boundaries)))
+        resize-events (debounce raw-resize-events 500)]
+    (tap scroll-mult filtered)
+    (pipe filtered deduped false)
+    (pipe deduped scroll-events false)
+    (go
+      (let [[v c] (alts! [resize-events kill-watch-events])]
+        (close! filtered)
+        (close! resize-events)
+        (when (= c resize-events)
+          (>! scroll-events ((get-current-fragment boundaries)))
+          (scroll-watch fragments))))))
 
 (defn scroll-unwatch [fragments]
-  (swap! watched-fragment-sets assoc fragments false))
+  (put! kill-watch-events fragments))
 
 (defn start-scroll []
-  (events/listen js/window "scroll" #(put! raw-scroll-events %)))
+  (events/listen js/window "scroll" #(put! raw-scroll-events %))
+  (events/listen js/window "resize" #(put! raw-resize-events true)))
