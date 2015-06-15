@@ -48,6 +48,7 @@
            (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
       (ANY "/*" [] fourohfour))
     (routes
+      (resources "/" {:root ""})
       (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
       (ANY "/*" [] fourohfour))))
 

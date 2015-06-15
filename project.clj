@@ -44,7 +44,8 @@
 
   :clean-targets ^{:protect false} [:target-path "resources/public" "resources/js"]
 
-  :figwheel {:ring-handler preterition.web/app}
+  :figwheel {:http-server-root ""
+             :css-dirs ["resources/css"]}
 
   :ring {:handler preterition.web/app}
 
@@ -57,9 +58,9 @@
               :source-paths ["src/preterition/client"]
               :figwheel { :on-jsload "preterition.client.core/on-jsload" }
               :compiler {:main preterition.client.core
-                         :output-dir "resources/public/js/out"
+                         :output-dir "resources/js/out"
                          :optimizations :none
-                         :output-to "resources/public/js/main.js"
+                         :output-to "resources/js/main.js"
                          :asset-path "js/out"}}
              {:id "prod"
               :figwheel false

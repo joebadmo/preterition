@@ -9,12 +9,14 @@
             [hickory.render :refer [hiccup-to-html]]
             [preterition.util :refer [convert-hiccup-to-html]]))
 
+(def ^:private host "http://localhost:3000/")
+
 (def ^:private r (reader :json))
 
 (defn- deserialize [raw] (read r raw))
 
 (defn request [path]
-  (let [url (str "/api/" path)]
+  (let [url (str host "api/" path)]
     (http/get url {:with-credentials? false
                    :channel (chan 1 (map #(-> % :body deserialize)))})))
 
