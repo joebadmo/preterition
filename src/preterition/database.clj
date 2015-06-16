@@ -4,12 +4,13 @@
             [clojure.java.jdbc :as jdbc]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
+            [preterition.config :as config]
             [taoensso.nippy :as nippy]))
 
 (def ^:private db-spec {:classname "org.postgresql.Driver"
                         :subprotocol "postgresql"
-                        :subname "//localhost:5432/jmoon"
-                        :user "jmoon"})
+                        :subname config/database-url
+                        :user config/database-user})
 
 (defquery create-documents-table! "preterition/sql/create-documents-table.sql"
   {:connection db-spec})

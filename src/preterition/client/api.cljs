@@ -9,7 +9,9 @@
             [hickory.render :refer [hiccup-to-html]]
             [preterition.util :refer [convert-hiccup-to-html]]))
 
-(def ^:private host "http://localhost:3000/")
+(def ^:private host (if false
+                      "/"
+                      "http://localhost:3000/"))
 
 (def ^:private r (reader :json))
 
@@ -25,15 +27,15 @@
     (-> (<! (request (str "document/" (if (not-empty path) path "index"))))
         (update-in [:content] convert-hiccup-to-html))))
 
-(def initialState (if-let [e (goog.dom/getElement "state")]
+(def initial-state (if-let [e (goog.dom/getElement "state")]
                     (-> e .-textContent read-string)))
 
 (def ^:private memo (atom {}))
 
-(if initialState
-  (let [{:keys [category path]} (initialState :route)
+(if initial-state
+  (let [{:keys [category path]} (initial-state :route)
         k (->> [category path] (filter not-empty) (join "/"))
-        res (-> initialState :route :data)]
+        res (-> initial-state :route :data)]
     (swap! memo assoc k res)))
 
 (defn cached? [{:keys [category path]}]

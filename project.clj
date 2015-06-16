@@ -16,6 +16,7 @@
                  [com.taoensso/nippy "2.9.0-RC2"]
                  [compojure "1.3.4"]
                  [digest "1.4.4"]
+                 [environ "1.0.0"]
                  [fivetonine/collage "0.2.0"]
                  [hiccup "1.0.5"]
                  [hickory "0.5.4"]
@@ -38,7 +39,8 @@
 
   :target-path "target/%s"
 
-  :plugins [[lein-ring "0.8.11"]
+  :plugins [[lein-environ "1.0.0"]
+            [lein-ring "0.8.11"]
             [lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3"]]
 
@@ -56,7 +58,7 @@
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src/preterition/client"]
-              :figwheel { :on-jsload "preterition.client.core/on-jsload" }
+              :figwheel {:on-jsload "preterition.client.core/on-jsload"}
               :compiler {:main preterition.client.core
                          :output-dir "resources/js/out"
                          :optimizations :none
@@ -64,15 +66,16 @@
                          :asset-path "js/out"}}
              {:id "prod"
               :figwheel false
-              :source-paths ["src/preterition/client"]
+              :source-paths ["src/preterition/client" "src/preterition"]
               :compiler {:source-map "resources/js/main.js.map"
                          :optimizations :advanced
                          :output-dir "resources/js/prod/out"
-                         :output-to "resources/js/main.js"} }
+                         :output-to "resources/js/main.js"}}
+                         ; :elide-asserts true}}
              {:id "static"
               :figwheel false
               :source-paths ["src/preterition/client/render"]
               :compiler {:source-map "resources/js/render.js.map"
                          :optimizations :advanced
                          :output-dir "resources/js/static/out"
-                         :output-to "resources/js/render.js"} }]})
+                         :output-to "resources/js/render.js"}}]})

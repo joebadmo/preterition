@@ -3,7 +3,6 @@
             [compojure.core :refer [context defroutes GET POST ANY routes]]
             [compojure.route :refer [not-found resources]]
             [clojure.string :refer [split join]]
-            [preterition.config :refer [env]]
             [preterition.core :refer [on-post]]
             [preterition.database :as db]
             [preterition.documents :as documents]
@@ -40,17 +39,12 @@
     (GET "/category/:category" [category] {:body (-> category db/get-documents-by-category write)})))
 
 (def resource-routes
-  (if (= env :prod)
-    (routes
-      (resources "/" {:root "public"})
-      (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
-      (GET "/*" {uri :uri}
-           (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
-      (ANY "/*" [] fourohfour))
-    (routes
-      (resources "/" {:root ""})
-      (GET "/*" [] (-> (file-response "index.html" {:root "resources"}) (content-type "text/html")))
-      (ANY "/*" [] fourohfour))))
+  (routes
+    (resources "/" {:root "public"})
+    (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
+    (GET "/*" {uri :uri}
+         (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
+    (ANY "/*" [] fourohfour)))
 
 
 (def cors-headers

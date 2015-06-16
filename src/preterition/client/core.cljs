@@ -1,8 +1,9 @@
 (ns preterition.client.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go]]
+                   [preterition.macros :as p])
   (:require [cljs.core.async :refer [<! chan take!]]
             [goog.dom]
-            [preterition.client.api :refer [initialState get-route-data cached?]]
+            [preterition.client.api :refer [initial-state get-route-data cached?]]
             [preterition.client.components :refer [Main]]
             [preterition.client.router :refer [start stop router set-title!]]
             [preterition.client.scroll :refer [scroll-to-fragment]]
@@ -12,27 +13,28 @@
 
 ; (enable-console-print!)
 
-(defonce application-state (atom initialState))
+; (prn (p/getenv "HOME"))
+
+(defonce application-state (atom initial-state))
 
 (def get-root #(if js/document (.getElementById js/document "main")))
 
 (defn init [state-atom]
-  (let [root (get-root)]
-    (go
-      (while true
-        (let [{:keys [category path fragment type] :as route} (<! router)]
-          (swap! state-atom assoc
-                 :event-type type
-                 :nav-data (get-nav category fragment)
-                 :route nil)
-          (if-not (cached? route)
-            (swap! state-atom assoc :loading true))
-          (swap! state-atom assoc
-                 :loading false
-                 :route {:data (<! (get-route-data {:category category :path path}))
-                         :category category
-                         :path path
-                         :fragment fragment}))))))
+  (go
+    (while true
+      (let [{:keys [category path fragment type] :as route} (<! router)]
+        (swap! state-atom assoc
+               :event-type type
+               :nav-data (get-nav category fragment)
+               :route nil)
+        (if-not (cached? route)
+          (swap! state-atom assoc :loading true))
+        (swap! state-atom assoc
+               :loading false
+               :route {:data (<! (get-route-data {:category category :path path}))
+                       :category category
+                       :path path
+                       :fragment fragment})))))
 (defonce once
   (do
     (if-let [s @application-state]

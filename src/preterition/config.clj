@@ -1,7 +1,9 @@
-(ns preterition.config)
+(ns preterition.config
+  (:require [environ.core :refer [env]]))
 
-(def env :dev)
-; (def env :prod)
+(def database-url (env :database-url))
+(def database-user (env :database-user))
+(def env-name (env :env-name))
 
 (def path-prefix "./repos/")
 
