@@ -3,7 +3,8 @@
   (:require [cljs.core.async :refer [put! chan sliding-buffer mult tap close! pipe]]
             [clojure.string :refer [split]]
             [goog.events :as events]
-            [preterition.client.util.async :refer [debounce]]))
+            [preterition.client.util.async :refer [debounce]]
+            [preterition.client.util.browser :refer [in-browser]]))
 
 (defn scroll-to-fragment [fragment]
   (let [fragment-string (second (split fragment "#"))]
@@ -12,7 +13,8 @@
       (.scroll js/window 0 0))))
 
 (def ^:private raw-scroll-events (chan (sliding-buffer 1)))
-(def ^:private scroll-mult (mult raw-scroll-events))
+;nashorn chokes on mult because it apparently uses a browser-only feature
+(def ^:private scroll-mult (when in-browser (mult raw-scroll-events)))
 (def ^:private raw-resize-events (chan (sliding-buffer 1)))
 
 (defn get-boundary [fragment]

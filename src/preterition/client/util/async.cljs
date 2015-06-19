@@ -2,8 +2,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan <! timeout]]))
 
-(enable-console-print!)
-
 (defn debounce
   ([in ms] (debounce (chan) in ms))
   ([out in ms]

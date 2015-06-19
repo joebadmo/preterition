@@ -70,12 +70,12 @@
               :compiler {:source-map "resources/js/main.js.map"
                          :optimizations :advanced
                          :output-dir "resources/js/prod/out"
-                         :output-to "resources/js/main.js"}}
-                         ; :elide-asserts true}}
+                         :output-to "resources/js/main.js"
+                         :elide-asserts true}}
              {:id "static"
               :figwheel false
               :source-paths ["src/preterition/client/render"]
               :compiler {:source-map "resources/js/render.js.map"
-                         :optimizations :advanced
+                         :optimizations :whitespace
                          :output-dir "resources/js/static/out"
                          :output-to "resources/js/render.js"}}]})

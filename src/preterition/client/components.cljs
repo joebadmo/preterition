@@ -1,6 +1,7 @@
 (ns preterition.client.components
   (:require [clojure.string :refer [blank?]]
             [preterition.client.scroll :refer [scroll-watch scroll-unwatch]]
+            [preterition.client.util.browser :refer [in-browser]]
             [preterition.client.util.date :refer [format-date]]
             [quiescent.core :as q]
             [quiescent.dom :as dom]))
@@ -38,8 +39,8 @@
   (Nav (concat [(Home loading)] (map NavItem data))))
 
 (q/defcomponent Index
-  :on-mount (fn [] (if js/document (scroll-watch ["about" "code" "prose"])))
-  :on-unmount (fn [] (if js/document (scroll-unwatch ["about" "code" "prose"])))
+  :on-mount #(when in-browser (scroll-watch ["about" "code" "prose"]))
+  :on-unmount #(when in-browser (scroll-unwatch ["about" "code" "prose"]))
   [content]
   (dom/div
     nil
