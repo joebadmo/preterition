@@ -1,6 +1,5 @@
 (ns preterition.client.core
-  (:require-macros [cljs.core.async.macros :refer [go]]
-                   [preterition.macros :as p])
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [<! chan take!]]
             [goog.dom]
             [preterition.client.api :refer [initial-state get-route-data cached?]]
@@ -13,11 +12,9 @@
 
 ; (enable-console-print!)
 
-; (prn (p/getenv "HOME"))
-
 (defonce application-state (atom initial-state))
 
-(def get-root #(if js/document (.getElementById js/document "main")))
+(def root (.getElementById js/document "main"))
 
 (defn init [state-atom]
   (go
@@ -56,7 +53,7 @@
 
     ; render initially so client can take over
     ; and scroll hooks on index can start
-    (when-let [root (get-root)]
+    (when root
       (let [state @application-state
             {:keys [category path]} (-> state :route)]
         (q/render (Main state) root)
@@ -76,6 +73,6 @@
 (defn on-jsload []
   (do
     (init application-state)
-    (q/render (Main @application-state) (get-root))
+    (q/render (Main @application-state) root)
     (stop)
     (start)))

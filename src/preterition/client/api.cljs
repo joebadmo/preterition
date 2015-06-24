@@ -7,11 +7,10 @@
             [cognitect.transit :refer [read reader]]
             [goog.dom]
             [hickory.render :refer [hiccup-to-html]]
+            [preterition.client.util.browser :refer [in-figwheel]]
             [preterition.util :refer [convert-hiccup-to-html]]))
 
-(def ^:private host (if false
-                      "/"
-                      "http://localhost:3000/"))
+(def ^:private host (if in-figwheel "http://localhost:3000/" "/"))
 
 (def ^:private r (reader :json))
 
