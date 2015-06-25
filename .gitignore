@@ -14,3 +14,4 @@ resources/js/
 resources/images/img/
 .cljs_rhino_repl
 figwheel_server.log
+.vagrant
