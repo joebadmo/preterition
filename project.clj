@@ -33,14 +33,14 @@
                  [ring/ring-json "0.3.1"]
                  [ring/ring-jetty-adapter "1.3.2"]
                  [squirrel "0.1.2-yesql-0.1.0"]
-                 [yesql "0.5.0-beta2"]]
+                 [yesql "0.5.0-rc3"]]
 
-  :main ^:skip-aot preterition.core
+  :main ^:skip-aot preterition.web
 
   :target-path "target/%s"
 
   :plugins [[lein-environ "1.0.0"]
-            [lein-ring "0.8.11"]
+            [lein-ring "0.9.6"]
             [lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3"]]
 
