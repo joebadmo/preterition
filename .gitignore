@@ -10,7 +10,9 @@ pom.xml.asc
 /repos
 todo.md
 resources/public/js
-resources/public/src
+resources/public/img
+resources/public/css
+resources/public/src/js
 resources/public/bundles
 resources/public/html
 resources/js/

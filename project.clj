@@ -46,7 +46,7 @@
 
   :clean-targets ^{:protect false} [:target-path
                                     "resources/public/js"
-                                    "resources/public/src"
+                                    "resources/public/src/js"
                                     "resources/public/bundles"
                                     "resources/public/html"
                                     "resources/js"]

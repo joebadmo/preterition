@@ -43,9 +43,9 @@
 (def resource-routes
   (routes
     (resources "/" {:root "public"})
-    (GET "/" [] (-> (file-response "index.html" {:root "resources/public"}) (content-type "text/html")))
+    (GET "/" [] (-> (file-response "index.html" {:root "resources/public/html"}) (content-type "text/html")))
     (GET "/*" {uri :uri}
-         (-> uri rest join (str ".html") (file-response {:root "resources/public"}) (content-type "text/html")))
+         (-> uri rest join (str ".html") (file-response {:root "resources/public/html"}) (content-type "text/html")))
     (ANY "/*" [] fourohfour)))
 
 

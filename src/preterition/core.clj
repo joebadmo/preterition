@@ -64,7 +64,7 @@
            (assoc {:git-commit head-commit-map} :add)))))
 
 (defn write [path content]
-  (let [filename (str "resources/public/" path ".html")]
+  (let [filename (str "resources/public/html/" path ".html")]
     (io/make-parents filename)
     (spit filename content)))
 
@@ -90,7 +90,10 @@
         (export-assets)
         (render-all)
         document-set)
-      "nothing new")))
+      (do
+        (export-assets)
+        (render-all)
+        "rendered"))))
 
 ; (export-assets)
 ; (render-all)
