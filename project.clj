@@ -44,10 +44,15 @@
             [lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3"]]
 
-  :clean-targets ^{:protect false} [:target-path "resources/public" "resources/js"]
+  :clean-targets ^{:protect false} [:target-path
+                                    "resources/public/js"
+                                    "resources/public/src"
+                                    "resources/public/bundles"
+                                    "resources/public/html"
+                                    "resources/js"]
 
-  :figwheel {:http-server-root ""
-             :css-dirs ["resources/css"]}
+  :figwheel {:http-server-root "public"
+             :css-dirs ["resources/public/css"]}
 
   :ring {:handler preterition.web/app}
 
@@ -62,17 +67,17 @@
               :source-paths ["src/preterition/client"]
               :figwheel {:on-jsload "preterition.client.core/on-jsload"}
               :compiler {:main preterition.client.core
-                         :output-dir "resources/js/out"
+                         :output-dir "resources/public/js/out"
                          :optimizations :none
-                         :output-to "resources/js/main.js"
+                         :output-to "resources/public/js/main.js"
                          :asset-path "js/out"}}
              {:id "prod"
               :figwheel false
               :source-paths ["src/preterition/client" "src/preterition"]
-              :compiler {:source-map "resources/js/main.js.map"
+              :compiler {:source-map "resources/public/src/js/main.js.map"
                          :optimizations :advanced
-                         :output-dir "resources/js/prod/out"
-                         :output-to "resources/js/main.js"
+                         :output-dir "resources/public/src/js/prod/out"
+                         :output-to "resources/public/src/js/main.js"
                          :elide-asserts true}}
              {:id "static"
               :figwheel false

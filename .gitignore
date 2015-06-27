@@ -9,9 +9,11 @@ pom.xml.asc
 /.nrepl-port
 /repos
 todo.md
-resources/public/
+resources/public/js
+resources/public/src
+resources/public/bundles
+resources/public/html
 resources/js/
-resources/images/img/
 .cljs_rhino_repl
 figwheel_server.log
 .vagrant
