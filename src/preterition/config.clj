@@ -3,7 +3,6 @@
 
 (def database-url (env :database-url))
 (def database-user (env :database-user))
-(def env-name (env :env-name))
 
 (def path-prefix "./repos/")
 
