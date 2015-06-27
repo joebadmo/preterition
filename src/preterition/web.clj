@@ -1,4 +1,5 @@
 (ns preterition.web
+  (:gen-class)
   (:require [cognitect.transit :as transit]
             [compojure.core :refer [context defroutes GET POST ANY routes]]
             [compojure.route :refer [not-found resources]]
@@ -6,6 +7,7 @@
             [preterition.core :refer [on-post]]
             [preterition.database :as db]
             [preterition.documents :as documents]
+            [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [ring.util.response :refer [response file-response content-type charset]])
@@ -65,3 +67,6 @@
                resource-routes)
              wrap-content-type
              wrap-cors))
+
+(defn -main []
+  (run-jetty app {:port 3000}))

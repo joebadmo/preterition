@@ -51,6 +51,8 @@
 
   :ring {:handler preterition.web/app}
 
+  :auto-clean false
+
   :profiles {:uberjar {:aot :all}}
 
   :repl-options {:timeout 120000}
