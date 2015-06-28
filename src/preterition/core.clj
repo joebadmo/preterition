@@ -87,13 +87,10 @@
     (if-let [document-set (get-document-set config)]
       (do
         (db/update document-set)
-        (export-assets)
         (render-all)
         document-set)
       (do
-        (export-assets)
         (render-all)
         "rendered"))))
 
-; (export-assets)
 ; (render-all)

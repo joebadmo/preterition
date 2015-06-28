@@ -46,6 +46,8 @@
 
   :clean-targets ^{:protect false} [:target-path
                                     "resources/public/js"
+                                    "resources/public/css"
+                                    "resources/public/img"
                                     "resources/public/src/js"
                                     "resources/public/bundles"
                                     "resources/public/html"
@@ -61,6 +63,8 @@
   :profiles {:uberjar {:aot :all}}
 
   :repl-options {:timeout 120000}
+
+  :aliases {"export-assets" ["run" "-m" "preterition.assets/export-assets"]}
 
   :cljsbuild {
     :builds [{:id "dev"
