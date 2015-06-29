@@ -11,7 +11,7 @@
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
             [ring.util.response :refer [response file-response content-type charset]])
-  (import [java.io ByteArrayInputStream ByteArrayOutputStream]))
+  (import [java.io ByteArrayOutputStream]))
 
 (def fourohfour (not-found "Not found"))
 
@@ -44,6 +44,7 @@
   (routes
     (resources "/" {:root "public"})
     (GET "/" [] (-> (file-response "index.html" {:root "resources/public/html"}) (content-type "text/html")))
+    (GET "/img/*" {uri :uri} (-> uri (split #"\/") last db/get-image))
     (GET "/*" {uri :uri}
          (-> uri rest join (str ".html") (file-response {:root "resources/public/html"}) (content-type "text/html")))
     (ANY "/*" [] fourohfour)))

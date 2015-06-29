@@ -5,7 +5,8 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [preterition.config :as config]
-            [taoensso.nippy :as nippy]))
+            [taoensso.nippy :as nippy])
+  (import [java.io ByteArrayInputStream]))
 
 (def ^:private db-spec {:classname "org.postgresql.Driver"
                         :subprotocol "postgresql"
@@ -18,7 +19,13 @@
 (defquery create-commits-table! "preterition/sql/create-commits-table.sql"
   {:connection db-spec})
 
+(defquery create-images-table! "preterition/sql/create-images-table.sql"
+  {:connection db-spec})
+
 (defquery insert-document! "preterition/sql/insert.sql"
+  {:connection db-spec})
+
+(defquery insert-image! "preterition/sql/insert-image.sql"
   {:connection db-spec})
 
 (defquery insert-commit! "preterition/sql/insert-commit.sql"
@@ -34,6 +41,9 @@
   {:connection db-spec})
 
 (defquery select-document-by-path "preterition/sql/select.sql"
+  {:connection db-spec})
+
+(defquery select-image "preterition/sql/select-image.sql"
   {:connection db-spec})
 
 (defquery update-document! "preterition/sql/update.sql"
@@ -90,6 +100,17 @@
     {:path doc}
     {:result-set-fn first
      :row-fn #(-> % sql-to-document (update-in [:content] nippy/thaw))}))
+
+(defn get-image [path]
+  (select-image
+    {:path path}
+    {:result-set-fn first
+     :row-fn #(-> % :data (ByteArrayInputStream.))}))
+
+(defn write-image [img-byte-array path]
+  (insert-image!
+    {:path path
+     :data img-byte-array}))
 
 (defn get-documents-by-category [category]
   (select-documents-by-category

@@ -6,7 +6,7 @@
             [hickory.core :refer [parse-fragment as-hickory]]
             [hickory.select :refer [tag until select-next-loc] :as select]
             [hickory.zip :refer [hickory-zip]]
-            [preterition.images :refer [make-local-copy]]))
+            [preterition.images :refer [make-local-copy!]]))
 
 (def ^:private options [:smartypants])
 
@@ -34,7 +34,7 @@
 (def ^:private select-next-img (partial select-next-loc (tag :img)))
 
 (defn- replace-image-src [loc]
-  (edit loc (fn [l] (update-in l [:attrs] (fn [attrs] (update-in attrs [:src] make-local-copy))))))
+  (edit loc (fn [l] (update-in l [:attrs] (fn [attrs] (update-in attrs [:src] make-local-copy!))))))
 
 (defn- replace-next-image [loc]
   (if-let [t (select-next-img loc)]
