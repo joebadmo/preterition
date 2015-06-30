@@ -35,12 +35,12 @@
              :fragment nil}}))
 
 (defn cache-buster [path]
-  (->> (str "./resources/public" path) slurp md5 (str path "?")))
+  (->> (str "./resources/src" path) slurp md5 (str path "?")))
 
 (defn render-fn []
   (let [js (doto (.getEngineByName (ScriptEngineManager.) "nashorn")
              (.eval "var global = this;")
-             (.eval (-> "js/render.js"
+             (.eval (-> "src/js/render.js"
                         io/resource
                         io/reader)))
         main (.eval js "preterition.client.render")

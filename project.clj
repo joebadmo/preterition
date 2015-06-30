@@ -44,14 +44,7 @@
             [lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3"]]
 
-  :clean-targets ^{:protect false} [:target-path
-                                    "resources/public/js"
-                                    "resources/public/css"
-                                    "resources/public/img"
-                                    "resources/public/src/js"
-                                    "resources/public/bundles"
-                                    "resources/public/html"
-                                    "resources/js"]
+  :clean-targets ^{:protect false} [:target-path "resources/public" "resources/src/js"]
 
   :figwheel {:http-server-root "public"
              :css-dirs ["resources/public/css"]}
@@ -78,15 +71,15 @@
              {:id "prod"
               :figwheel false
               :source-paths ["src/preterition/client" "src/preterition"]
-              :compiler {:source-map "resources/public/src/js/main.js.map"
+              :compiler {:source-map "resources/src/js/main.js.map"
                          :optimizations :advanced
-                         :output-dir "resources/public/src/js/prod/out"
-                         :output-to "resources/public/src/js/main.js"
+                         :output-dir "resources/src/js/prod/out"
+                         :output-to "resources/src/js/main.js"
                          :elide-asserts true}}
              {:id "static"
               :figwheel false
               :source-paths ["src/preterition/client/render"]
-              :compiler {:source-map "resources/js/render.js.map"
+              :compiler {:source-map "resources/src/js/render.js.map"
                          :optimizations :whitespace
-                         :output-dir "resources/js/static/out"
-                         :output-to "resources/js/render.js"}}]})
+                         :output-dir "resources/src/js/static/out"
+                         :output-to "resources/src/js/render.js"}}]})
