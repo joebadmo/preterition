@@ -11,7 +11,8 @@
 (def ^:private db-spec {:classname "org.postgresql.Driver"
                         :subprotocol "postgresql"
                         :subname config/database-url
-                        :user config/database-user})
+                        :user config/database-user
+                        :password config/database-password})
 
 (defquery create-documents-table! "preterition/sql/create-documents-table.sql"
   {:connection db-spec})
