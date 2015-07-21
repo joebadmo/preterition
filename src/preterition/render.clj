@@ -35,7 +35,7 @@
              :fragment nil}}))
 
 (defn cache-buster [path]
-  (->> (str "./resources/src" path) slurp md5 (str path "?")))
+  (->> (str "src" path) io/resource slurp md5 (str path "?")))
 
 (defn render-fn []
   (let [js (doto (.getEngineByName (ScriptEngineManager.) "nashorn")
