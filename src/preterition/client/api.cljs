@@ -9,7 +9,7 @@
             [hickory.render :refer [hiccup-to-html]]
             [preterition.util :refer [convert-hiccup-to-html]]))
 
-(def ^:private host (if (js/eval "typeof figwheel === undefined")
+(def ^:private host (if (js/eval "typeof figwheel === 'undefined'")
                       "/"
                       "http://localhost:3000/"))
 
