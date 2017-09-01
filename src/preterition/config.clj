@@ -7,7 +7,7 @@
 
 (def path-prefix "./repos/")
 
-(def ^:private raw-configs [{:username "joebadmo"
+(def ^:private raw-configs [{:username "sodiumjoe"
                              :repository "joe.xoxomoon.com-content"
                              :branch "repo-store"}])
 

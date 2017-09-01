@@ -94,8 +94,8 @@
               (dom/i
                 {:className icon}))))
         [{:href "mailto:joe@xoxomoon" :target "blank" :icon "icon-mail-squared"}
-         {:href "https://github.com/joebadmo" :icon "icon-github-squared"}
-         {:href "https://twitter.com/joebadmo" :icon "icon-twitter-squared"}
+         {:href "https://github.com/sodiumjoe" :icon "icon-github-squared"}
+         {:href "https://twitter.com/sodiumjoe" :icon "icon-twitter-squared"}
          {:href "http://www.linkedin.com/in/joemoon" :icon "icon-linkedin-squared"}]))))
 
 (q/defcomponent Main [{:keys [title nav-data loading route]}]

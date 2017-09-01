@@ -46,6 +46,6 @@
                         .getCommitTime
                         convert-commit-time)})
 
-; (def repo (git/load-repo "repos/joebadmo/joe.xoxomoon.com-content"))
+; (def repo (git/load-repo "repos/sodiumjoe/joe.xoxomoon.com-content"))
 ; (git/git-checkout repo "repo-store")
 ; (git/git-branch-list repo)
